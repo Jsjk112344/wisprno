@@ -90,8 +90,9 @@ export class AnthropicModel implements ChatModel {
   }
   async complete(req: CompleteRequest): Promise<CompleteResult> {
     const system = req.json ? req.system + '\n\nReply with a single JSON object and nothing else.' : req.system;
-    const body: Record<string, unknown> = { model: this.model, max_tokens: req.maxTokens ?? 800, system, messages: req.messages };
-    if (req.temperature !== undefined) body.temperature = req.temperature;
+    // Current Claude models reject non-default sampling parameters and think by default (thinking counts toward
+    // max_tokens), so no temperature is sent and the token ceiling leaves room for thinking.
+    const body: Record<string, unknown> = { model: this.model, max_tokens: Math.max(4000, (req.maxTokens ?? 800) * 4), system, messages: req.messages };
     const b = await post(this.fetcher, 'https://api.anthropic.com/v1/messages', { 'x-api-key': this.key, 'anthropic-version': '2023-06-01' }, body);
     const text = (b.content ?? []).filter((c: any) => c.type === 'text').map((c: any) => c.text).join('');
     return { text, usage: { input: b.usage?.input_tokens ?? 0, output: b.usage?.output_tokens ?? 0 } };
