@@ -44,6 +44,19 @@ cp .env.example .env   # then fill in keys and the mock's admin token yourself
    admin token. Faultline never reads the mock's `.env`.
 3. Check the connection: `npm run faultline -- health`.
 
+## Dry run (no API spend)
+
+```sh
+npm run faultline -- sim                # full workflow locally, ~7 minutes
+npm run faultline -- sim --rounds 1 --exam-n 5   # quick smoke run, ~15 seconds
+```
+
+Starts the real mock server in-process on 127.0.0.1 (temporary database, `MOCK_DIR` defaults to
+`../voice_agent_mock`) and swaps every model for a local simulation (`src/sim`): a target agent with hand-written weak
+spots, a scripted tester and caller, a phrase-matching judge and a table-driven fixer. Everything else (adapter,
+scorer, minimiser, loop, exam, report, event logs) is the real code. Output goes to `results/sim/` (git-ignored); the
+numbers say nothing about any real model.
+
 ## Run the experiment
 
 ```sh

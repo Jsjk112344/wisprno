@@ -1,5 +1,6 @@
 // Model provider interface for the harness's own agents (tester, caller, judge, fixer). Not the target's model.
 // Selected by config as "<provider>:<model>". No SDKs; plain fetch.
+import { SimModel } from '../sim/models.ts';
 
 export interface ChatMessage {
   role: 'user' | 'assistant';
@@ -141,6 +142,7 @@ export function modelFromSpec(spec: string | undefined, env: Record<string, stri
   if (vendor === 'openai') return new OpenAIModel(model, need('OPENAI_API_KEY'), fetcher);
   if (vendor === 'anthropic') return new AnthropicModel(model, need('ANTHROPIC_API_KEY'), fetcher);
   if (vendor === 'gemini') return new GeminiModel(model, need('GEMINI_API_KEY'), fetcher);
+  if (vendor === 'sim') return new SimModel(model); // local dry runs only; no network
   throw new Error(`unknown provider "${vendor}"`);
 }
 
