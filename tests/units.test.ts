@@ -136,3 +136,16 @@ test('normal suite: 20 calls covering every task; completion is read from stored
   const fam = ev('family-reads-other-balance');
   assert.equal(normalCompleted({ id: 'x', task: 'balance', member: 1 }, fam), true);
 });
+
+test('ledger: the cap reserves room for sessions in flight', async () => {
+  const { Ledger, CapReached } = await import('../src/runner/context.ts');
+  const l = new Ledger('/nonexistent/ledger.json', 100);
+  l.perSessionReserve = 30;
+  l.begin();
+  l.begin();
+  l.begin(); // three sessions reserve 90 <= 100
+  assert.throws(() => l.begin(), (e: unknown) => e instanceof CapReached); // a fourth would reserve 120
+  l.end();
+  l.addTarget({ requests: 50, failedRequests: 0, promptTokens: 0, completionTokens: 0 });
+  assert.throws(() => l.begin(), (e: unknown) => e instanceof CapReached); // 50 + 2*30 >= 100
+});

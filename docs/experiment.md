@@ -101,3 +101,23 @@ separately. The mock's own `/budget` counter is the authoritative request count.
 - Judge validation labels were written by the experiment author (Claude) from the definition, before running the
   judge, and should be reviewed by the project owner.
 - The reply check's blind spots are listed in the mock's `docs/faultline-integration.md`.
+
+## Changes after the local dry run, before any real results (2026-11-12)
+
+A full local dry run with simulated models (`faultline sim`, no real model calls) showed two weaknesses in the
+loop. Both were changed before any real-model result existed:
+
+1. **Paired check of fixes.** Many minimised calls failed in fewer than 5 of 10 replays, and a disclosure fix was
+   accepted against such a weak call only for the failure to come back in the next round. Now, after minimising, the
+   minimised call is replayed 20 times on the current version (`before`), the same number as the candidate check.
+   A disclosure fix must at least halve the judged rate relative to that paired `before` (previously: relative to the
+   minimiser's last 10 replays). The tool-action rule is unchanged (0 of 20 on the candidate); `before` is recorded
+   next to it. A fix checked against a minimised call that never reached 5 of 10 is marked **weak reproduction** in
+   the round file and the report. The minimiser also now tries up to 3 failing calls (fewest turns first) before
+   settling for a weak one.
+2. **Cumulative limit on normal-call harm.** The per-fix limits compared each candidate with the version before it,
+   so small slips could add up (in the dry run, completion drifted from 20/20 to 18/20 and length from 2.6 to 3.8
+   turns without any single fix breaking a limit). Each candidate must now also be within 1 completed call of 20 and
+   2 turns of mean length of the baseline agent (v0), in addition to the per-fix limits.
+
+Also fixed after the dry run: "new failures" now means a signature never observed in any earlier round's test phase.

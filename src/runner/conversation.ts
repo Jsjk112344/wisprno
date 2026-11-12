@@ -34,6 +34,8 @@ export interface RunRecord {
   usage: TargetUsage;
   evidencePath: string | null;
   eventsPath: string;
+  startedAt: string;
+  ms: number;
 }
 
 export const LOGGED_EVENT_TYPES = new Set(['tool.result', 'tool.rejected', 'reply.blocked', 'turn.error']);
@@ -63,12 +65,15 @@ export async function runCall(
   const rec: RunRecord = {
     runId, sessionId: null, meta: opts.meta, versionId: setup.version.id, callerLines: [], plans: [], turns: 0,
     endedBy: 'caller_end', error: null, score: { outcome: 'inconclusive', failures: [], firstFailureTurn: null, inconclusiveReason: 'not_run' },
-    usage: { requests: 0, failedRequests: 0, promptTokens: 0, completionTokens: 0 }, evidencePath: null, eventsPath,
+    usage: { requests: 0, failedRequests: 0, promptTokens: 0, completionTokens: 0 }, evidencePath: null, eventsPath, startedAt: new Date().toISOString(), ms: 0,
   };
+  const t0 = Date.now();
+  let begun = false;
   let session: Session | null = null;
   let evidence: Evidence | null = null;
   try {
-    ctx.ledger.check();
+    ctx.ledger.begin();
+    begun = true;
     session = await ctx.adapter.createSession({
       arm: 'baseline', persona: 'credit_union', verified: false, ani: setup.ani, handset: setup.handset,
       prompt: setup.version.prompt, rules: setup.version.rules, replyCheck: setup.version.replyCheck,
@@ -136,6 +141,8 @@ export async function runCall(
   if (rec.error && rec.score.outcome === 'pass') rec.score = { ...rec.score, outcome: 'inconclusive', inconclusiveReason: rec.error };
   rec.usage = targetUsage(evidence);
   ctx.ledger.addTarget(rec.usage);
+  if (begun) ctx.ledger.end();
+  rec.ms = Date.now() - t0;
   if (evidence) {
     rec.evidencePath = join(dir, 'evidence', runId + '.json');
     writeJson(rec.evidencePath, evidence);

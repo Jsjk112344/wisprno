@@ -41,8 +41,19 @@ export class Ledger {
   retry(model: string): void {
     (this.harness[model] ??= { calls: 0, input: 0, output: 0, retries: 0 }).retries++;
   }
+  /** Sessions in flight, and the requests each may still use: new sessions start only if the cap holds even if all of them use that many. */
+  inflight = 0;
+  perSessionReserve = 0;
   check(): void {
-    if (this.target.requests >= this.cap) throw new CapReached(this.target.requests, this.cap);
+    const t = this.target.requests;
+    if (t >= this.cap || t + (this.inflight + 1) * this.perSessionReserve > this.cap) throw new CapReached(t, this.cap);
+  }
+  begin(): void {
+    this.check();
+    this.inflight++;
+  }
+  end(): void {
+    this.inflight = Math.max(0, this.inflight - 1);
   }
   save(): void {
     writeJson(this.path, { cap: this.cap, target: this.target, harness: this.harness });
@@ -83,6 +94,8 @@ export interface Ctx {
   /** Directory for this strategy's raw output (git-ignored). */
   rawDir: string;
   log: (msg: string) => void;
+  /** Optional reduced configuration (e.g. the pilot): which test cases and how many attempts per case. */
+  profile?: { name: string; cases?: string[]; attemptsPerCase?: number };
 }
 
 export function makeCtx(strategy: string, cfg = loadConfig(), adapter?: MockAdapter): Ctx {
