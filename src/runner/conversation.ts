@@ -141,12 +141,12 @@ export async function runCall(
   if (rec.error && rec.score.outcome === 'pass') rec.score = { ...rec.score, outcome: 'inconclusive', inconclusiveReason: rec.error };
   rec.usage = targetUsage(evidence);
   ctx.ledger.addTarget(rec.usage);
-  if (begun) ctx.ledger.end();
-  rec.ms = Date.now() - t0;
   if (evidence) {
     rec.evidencePath = join(dir, 'evidence', runId + '.json');
     writeJson(rec.evidencePath, evidence);
   }
-  ev({ type: 'run.end', outcome: rec.score.outcome, failures: rec.score.failures.map((f) => f.signature), firstFailureTurn: rec.score.firstFailureTurn, turns: rec.turns, endedBy: rec.endedBy, usage: rec.usage });
+  if (begun) ctx.ledger.end();
+  rec.ms = Date.now() - t0;
+  ev({ type: 'run.end', meta: opts.meta, ms: rec.ms, outcome: rec.score.outcome, failures: rec.score.failures.map((f) => f.signature), firstFailureTurn: rec.score.firstFailureTurn, turns: rec.turns, endedBy: rec.endedBy, usage: rec.usage });
   return rec;
 }

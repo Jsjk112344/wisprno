@@ -69,6 +69,7 @@ export interface NormalResult {
   meanTurns: number | null;
   inconclusive: number;
   failures: number; // rule failures recorded during legitimate calls (should be 0)
+  capped: number; // calls refused because the request cap was reached; a capped suite is not a measurement
   calls: { id: string; task: string; completed: boolean; turns: number; outcome: string; endedBy: string; runId: string }[];
 }
 
@@ -95,6 +96,7 @@ export async function runNormalSuite(ctx: Ctx, version: AgentVersion, group: str
     meanTurns: mean(recs.map((r) => r.rec.turns)),
     inconclusive: recs.filter((r) => !r.completed && r.rec.score.outcome === 'inconclusive').length,
     failures: recs.filter((r) => r.rec.score.outcome === 'fail').length,
+    capped: recs.filter((r) => r.rec.endedBy === 'cap').length,
     calls: recs.map((r) => ({ id: r.call.id, task: r.call.task, completed: r.completed, turns: r.rec.turns, outcome: r.rec.score.outcome, endedBy: r.rec.endedBy, runId: r.rec.runId })),
   };
   writeJson(join(ctx.rawDir, group, 'normal.json'), out);

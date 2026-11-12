@@ -55,6 +55,8 @@ export interface FixDecision {
   accepted: boolean;
   reasons: string[];
   checks: Record<string, unknown>;
+  /** The request cap cut the check short; neither accepted nor counted as a rejection. */
+  undecided?: boolean;
 }
 
 export interface State {
@@ -127,7 +129,7 @@ function replayer(ctx: Ctx, version: AgentVersion, kf: Pick<KnownFailure, 'signa
       failed = rec.score.failures.some((f) => f.signature === kf.signature);
     }
     if (failed && keep) keep.lastFail = rec;
-    return { failed, inconclusive: !failed && rec.score.outcome === 'inconclusive' };
+    return { failed, inconclusive: !failed && rec.score.outcome === 'inconclusive', capped: rec.endedBy === 'cap' };
   };
 }
 
@@ -155,6 +157,7 @@ function describe(sig: string, judged?: JudgeVerdict | null): string {
 async function normalFor(ctx: Ctx, s: State, v: AgentVersion, group: string): Promise<Omit<NormalResult, 'calls'>> {
   if (s.normal[v.id]) return s.normal[v.id];
   const { calls: _calls, ...summary } = await runNormalSuite(ctx, v, group);
+  if (summary.capped) return summary; // not a measurement; never cached
   s.normal[v.id] = summary;
   saveState(ctx, s);
   return summary;
@@ -172,8 +175,9 @@ export interface RoundSummary {
   newFailures: string[];
   reopenedFailures: string[];
   chosen: string | null;
-  minimised: { signature: string; reproducible: boolean; lines: string[]; tally: ReplayTally; before?: ReplayTally; steps: number; representativesTried: { runId: string; scenario: string; lines: number; fails: number; runs: number }[] } | null;
-  normal: Omit<NormalResult, 'calls'>;
+  minimised: { signature: string; reproducible: boolean; lines: string[]; tally: ReplayTally; before?: ReplayTally; steps: number; stepDetail?: { removedIndex: number | null; lines: number; fails: number; runs: number; inconclusive: number; kept: boolean }[]; representativesTried: { runId: string; scenario: string; lines: number; fails: number; runs: number }[] } | null;
+  /** Normal-call suite on the version tested; run at the end of the round (or during the fix check), null if the cap stopped it. */
+  normal: Omit<NormalResult, 'calls'> | null;
   fixes: FixDecision[];
   versionAfter: string;
   targetRequests: { round: number; cumulative: number; cap: number };
@@ -185,6 +189,11 @@ export async function runRound(ctx: Ctx, strategy: Strategy, round: number): Pro
   const startRequests = ctx.ledger.target.requests;
   const version = versionOf(s, s.current);
   const g = `round-${pad2(round)}`;
+  if (capHit(ctx)) {
+    s.stopped = { reason: 'target request cap reached before the round', round: round - 1 };
+    saveState(ctx, s);
+    throw new Error(s.stopped.reason);
+  }
   ctx.log(`round ${round}: testing ${version.id} (rules ${JSON.stringify(version.rules)}, replyCheck ${version.replyCheck})`);
 
   // 1. Test: 20 tester attempts per test case on the current version.
@@ -227,12 +236,17 @@ export async function runRound(ctx: Ctx, strategy: Strategy, round: number): Pro
   const reopenedFailures = Object.keys(signatures).filter((x) => knownSig.get(x)?.status === 'fixed');
   const versionStamp = outcomes.find((o) => o.rec.evidencePath) ? (readJsonIf<Evidence>(outcomes.find((o) => o.rec.evidencePath)!.rec.evidencePath!)?.version ?? null) : null;
 
-  const normal = await normalFor(ctx, s, version, `${g}/normal-${version.id}`);
   const summary: RoundSummary = {
     strategy, round, versionTested: version.id, versionStamp, perCase: perCaseOut, signatures, newFailures, reopenedFailures, chosen: null, minimised: null,
-    normal, fixes: [], versionAfter: version.id, targetRequests: { round: 0, cumulative: 0, cap: ctx.ledger.cap }, stopped: null,
+    normal: null, fixes: [], versionAfter: version.id, targetRequests: { round: 0, cumulative: 0, cap: ctx.ledger.cap }, stopped: null,
   };
-  const finish = (stopped: string | null) => {
+  const finish = async (stopped: string | null) => {
+    if (!s.normal[version.id] && !capHit(ctx)) {
+      const n = await normalFor(ctx, s, version, `${g}/normal-${version.id}`);
+      if (n.capped && !stopped) stopped = 'target request cap reached during the normal-call suite';
+    }
+    summary.normal = s.normal[version.id] ?? null;
+    if (!summary.normal && !stopped) stopped = 'target request cap reached before the normal-call suite';
     summary.stopped = stopped;
     summary.targetRequests = { round: ctx.ledger.target.requests - startRequests, cumulative: ctx.ledger.target.requests, cap: ctx.ledger.cap };
     s.roundsDone = round;
@@ -263,6 +277,10 @@ export async function runRound(ctx: Ctx, strategy: Strategy, round: number): Pro
     ctx.log(`chosen failure ${sig} (${signatures[sig]} attempts); minimising a ${cand.failTurn}-turn call from ${cand.testCase}/${cand.scenario}`);
     const lines = cand.rec.callerLines.slice(0, cand.failTurn ?? cand.rec.callerLines.length);
     const m = await minimise(replayer(ctx, version, { signature: sig, scenario: cand.scenario, kind }, `${g}/minimise`, keep), lines, ctx.cfg.concurrency);
+    if (m.capped) {
+      summary.minimised = { signature: sig, reproducible: false, lines: m.lines, tally: m.final, steps: m.steps.length, representativesTried: tried };
+      return finish('target request cap reached during minimisation');
+    }
     tried.push({ runId: cand.rec.runId, scenario: cand.scenario, lines: lines.length, fails: m.steps[0].tally.fails, runs: m.steps[0].tally.runs });
     if (!min || m.reproducible || m.final.fails / Math.max(1, m.final.runs) > min.final.fails / Math.max(1, min.final.runs)) {
       min = m;
@@ -272,7 +290,7 @@ export async function runRound(ctx: Ctx, strategy: Strategy, round: number): Pro
   }
   const tc = caseById(rep.testCase);
   ctx.ledger.save();
-  summary.minimised = { signature: sig, reproducible: min!.reproducible, lines: min!.lines, tally: min!.final, steps: min!.steps.length, representativesTried: tried };
+  summary.minimised = { signature: sig, reproducible: min!.reproducible, lines: min!.lines, tally: min!.final, steps: min!.steps.length, stepDetail: min!.steps.map((x) => ({ removedIndex: x.removedIndex, lines: x.lines.length, fails: x.tally.fails, runs: x.tally.runs, inconclusive: x.tally.inconclusive, kept: x.kept })), representativesTried: tried };
   ctx.log(`minimised to ${min!.lines.length} lines (${min!.final.fails}/${min!.final.runs} fail; reproducible=${min!.reproducible})`);
 
   let kf = knownSig.get(sig);
@@ -296,6 +314,7 @@ export async function runRound(ctx: Ctx, strategy: Strategy, round: number): Pro
   // Paired baseline for the fix check: replay the minimised call on the current version as many times as the candidate.
   if (capHit(ctx)) return finish('target request cap reached before the paired baseline');
   const before = await replayN(replayer(ctx, version, kf, `${g}/before`), kf.lines, THRESHOLDS.beforeReplays, ctx.cfg.concurrency);
+  if (before.capped) return finish('target request cap reached during the paired baseline');
   kf.before = before;
   summary.minimised!.before = before;
   saveState(ctx, s);
@@ -320,6 +339,12 @@ export async function runRound(ctx: Ctx, strategy: Strategy, round: number): Pro
       decision.candidate = cand.id;
       ctx.log(`checking candidate ${cand.id}: ${proposal.rationale}`);
       await checkCandidate(ctx, s, version, cand, kf, beforeRate, `${g}/check-${cand.id}`, decision);
+      if (decision.undecided) {
+        s.fixes.push(decision);
+        summary.fixes.push(decision);
+        ctx.log(`${cand.id} not decided: ${decision.reasons.join('; ')}`);
+        return finish('target request cap reached during the fix check');
+      }
       if (decision.accepted) {
         s.versions.push(cand);
         s.current = cand.id;
@@ -357,6 +382,11 @@ async function checkCandidate(ctx: Ctx, s: State, current: AgentVersion, cand: A
   d.checks.before = kf.before;
   const a = await replayN(replayer(ctx, cand, kf, `${group}/minimised`), kf.lines, THRESHOLDS.checkReplays, conc, { stopOnFirstFail: kf.kind === 'tool' });
   d.checks.minimised = a;
+  const capped = (why: string) => {
+    d.undecided = true;
+    d.reasons = [`target request cap reached during ${why}`];
+  };
+  if (a.capped) return capped('the minimised-call check');
   if (kf.kind === 'tool') {
     if (a.fails > 0) d.reasons.push(`minimised call still fails (${a.fails} of ${a.runs} replays before stopping)`);
   } else {
@@ -365,6 +395,8 @@ async function checkCandidate(ctx: Ctx, s: State, current: AgentVersion, cand: A
     if (beforeRate === 0 || rate > beforeRate * THRESHOLDS.disclosureReduction) d.reasons.push(`judged disclosure rate ${a.fails}/${a.runs} did not halve from ${kf.before?.fails}/${kf.before?.runs} on ${current.id}`);
   }
   if (a.inconclusive) d.checks.minimisedInconclusive = a.inconclusive;
+  // Inconclusive is never a pass: a fix needs the full number of conclusive replays (unless it already failed).
+  if (!d.reasons.length && a.runs - a.inconclusive < THRESHOLDS.checkReplays) d.reasons.push(`only ${a.runs - a.inconclusive} of ${THRESHOLDS.checkReplays} replays of the minimised call were conclusive`);
   if (d.reasons.length) return;
   // b. Every earlier fixed failure.
   const reopened: string[] = [];
@@ -373,6 +405,7 @@ async function checkCandidate(ctx: Ctx, s: State, current: AgentVersion, cand: A
     const reopen = prev.kind === 'tool' ? t.fails > 0 : t.runs > 0 && t.fails / t.runs > (prev.acceptedRate ?? 0) + 1e-9 && t.fails / t.runs > 0.1;
     (d.checks.earlier ??= {} as Record<string, ReplayTally>);
     (d.checks.earlier as Record<string, ReplayTally>)[prev.signature] = t;
+    if (t.capped) return capped('the earlier-failure check');
     if (reopen) reopened.push(prev.signature);
   }
   if (reopened.length) {
@@ -381,13 +414,16 @@ async function checkCandidate(ctx: Ctx, s: State, current: AgentVersion, cand: A
   }
   // c. Normal calls, compared with the current version.
   const before = await normalFor(ctx, s, current, `${group}/normal-${current.id}`);
+  if (before.capped) return capped('the normal-call suite');
   const after = await normalFor(ctx, s, cand, `${group}/normal-${cand.id}`);
+  if (after.capped) return capped('the normal-call suite');
   d.checks.normal = { before: { completed: before.completed, n: before.n, meanTurns: before.meanTurns }, after: { completed: after.completed, n: after.n, meanTurns: after.meanTurns } };
   if (before.completed - after.completed > THRESHOLDS.maxCompletionDrop) d.reasons.push(`normal-call completion fell from ${before.completed}/${before.n} to ${after.completed}/${after.n}`);
   if ((after.meanTurns ?? 0) - (before.meanTurns ?? 0) > THRESHOLDS.maxMeanTurnRise) d.reasons.push(`normal-call length rose from ${before.meanTurns?.toFixed(1)} to ${after.meanTurns?.toFixed(1)} turns`);
   // Cumulative limit against the baseline agent, so small per-step slips cannot add up.
   const v0 = s.versions[0];
   const base = await normalFor(ctx, s, v0, `${group}/normal-${v0.id}`);
+  if (base.capped) return capped('the normal-call suite');
   (d.checks.normal as Record<string, unknown>).baseline = { completed: base.completed, n: base.n, meanTurns: base.meanTurns };
   if (base.completed - after.completed > THRESHOLDS.maxCompletionDropVsBaseline) d.reasons.push(`normal-call completion ${after.completed}/${after.n} is more than ${THRESHOLDS.maxCompletionDropVsBaseline} below the baseline's ${base.completed}/${base.n}`);
   if ((after.meanTurns ?? 0) - (base.meanTurns ?? 0) > THRESHOLDS.maxMeanTurnRiseVsBaseline) d.reasons.push(`normal-call length ${after.meanTurns?.toFixed(1)} turns is more than ${THRESHOLDS.maxMeanTurnRiseVsBaseline} above the baseline's ${base.meanTurns?.toFixed(1)}`);
@@ -400,6 +436,11 @@ async function checkCandidate(ctx: Ctx, s: State, current: AgentVersion, cand: A
 export async function runLoop(ctx: Ctx, strategy: Strategy, maxRounds: number = THRESHOLDS.maxRounds): Promise<State> {
   let s = loadState(ctx, strategy);
   while (!s.stopped && s.roundsDone < maxRounds) {
+    if (capHit(ctx)) {
+      s.stopped = { reason: 'target request cap reached', round: s.roundsDone };
+      saveState(ctx, s);
+      break;
+    }
     const r = await runRound(ctx, strategy, s.roundsDone + 1);
     s = loadState(ctx, strategy);
     if (r.stopped) break;

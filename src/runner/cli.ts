@@ -1,5 +1,5 @@
 // Faultline CLI. Usage: npm run faultline -- <command> [--flags]
-import { readFileSync, rmSync, mkdirSync } from 'node:fs';
+import { readFileSync, rmSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { randomBytes } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
@@ -13,6 +13,7 @@ import { loadConfig, makeCtx, type Config } from './context.ts';
 import { runExam } from './exam.ts';
 import { baselineVersion, loadState, runLoop, runRound, BASELINE_PROMPT, type Strategy } from './experiment.ts';
 import { buildReport } from './report.ts';
+import { PILOT, copyRoundFiles, exportForLabelling, pilotMarkdown, summarisePilot } from './pilot.ts';
 import { pool, readJson, sha256, writeJson } from './util.ts';
 
 const { positionals, values } = parseArgs({
@@ -27,6 +28,8 @@ const { positionals, values } = parseArgs({
     group: { type: 'string' },
     rounds: { type: 'string' },
     'exam-n': { type: 'string' },
+    fresh: { type: 'boolean' },
+    sim: { type: 'boolean' },
   },
 });
 const MOCK_DIR = resolve(process.env.MOCK_DIR ?? '../voice_agent_mock');
@@ -121,16 +124,12 @@ async function minimiseProbe(cfg: Config, caseId: string, n: number) {
   return out;
 }
 
-/** The whole workflow locally: real mock server (in-process, loopback, temp DB) with simulated models. No network. */
-async function sim() {
-  const dir = resolve('results/sim');
-  rmSync(dir, { recursive: true, force: true });
-  mkdirSync(dir, { recursive: true });
+/** Real mock server in-process (loopback, temp DB) with the simulated target, plus sim harness models. */
+async function startSimServer(dir: string, limit: number) {
   const { server } = await import(pathToFileURL(join(MOCK_DIR, 'src', 'server.mjs')).href);
   const { Store } = await import(pathToFileURL(join(MOCK_DIR, 'src', 'store.mjs')).href);
   const { simTarget } = await import('../sim/target.ts');
   const store = new Store(join(dir, 'mock.sqlite'));
-  const limit = 1_000_000;
   const token = randomBytes(32).toString('hex');
   const app = server({ store, provider: simTarget({ reserve: () => store.reserve(limit) }), adminToken: token, requestLimit: limit });
   await new Promise<void>((r) => app.listen(0, '127.0.0.1', () => r()));
@@ -138,6 +137,15 @@ async function sim() {
     TARGET_URL: `http://127.0.0.1:${app.address().port}`, TARGET_ADMIN_TOKEN: token, CONCURRENCY: process.env.CONCURRENCY ?? '8', TARGET_REQUEST_CAP: '20000', RESULTS_DIR: dir,
     TESTER_MODEL: 'sim:tester', CALLER_MODEL: 'sim:caller', FIXER_MODEL: 'sim:fixer', JUDGE_MODEL: 'sim:judge', EXAM_TESTER_MODEL: 'sim:exam-tester',
   });
+  return { app, store, cfg };
+}
+
+/** The whole workflow locally: real mock server (in-process, loopback, temp DB) with simulated models. No network. */
+async function sim() {
+  const dir = resolve('results/sim');
+  rmSync(dir, { recursive: true, force: true });
+  mkdirSync(dir, { recursive: true });
+  const { app, store, cfg } = await startSimServer(dir, 1_000_000);
   const t0 = Date.now();
   const step = (s: string) => console.log(`\n### ${s}  (+${((Date.now() - t0) / 1000).toFixed(0)}s)`);
   try {
@@ -180,6 +188,49 @@ async function sim() {
   } finally {
     await new Promise<void>((r) => app.close(() => r()));
     store.close();
+  }
+}
+
+/** Pilot on real models: checks-only, 2 test cases x 10 attempts, at most 3 rounds, hard cap of 500 target requests. */
+async function pilot(fresh: boolean, simulated: boolean) {
+  const dir = resolve(simulated ? 'results/pilot-sim' : 'results/pilot');
+  if (fresh || simulated) rmSync(dir, { recursive: true, force: true });
+  mkdirSync(dir, { recursive: true });
+  // --sim: same pilot against the simulated target and models (no network), to check the pilot itself before spending.
+  const sim = simulated ? await startSimServer(dir, PILOT.cap * 10) : null;
+  const cfg = { ...(sim ? sim.cfg : loadConfig()), resultsDir: dir, cap: PILOT.cap, concurrency: sim ? 8 : PILOT.concurrency };
+  if (!sim) for (const role of ['tester', 'caller', 'fixer'] as const) if (cfg.models[role].startsWith('sim:')) throw new Error('pilot needs real models; ' + role + ' is ' + cfg.models[role]);
+  const t0 = Date.now();
+  const h = await health(cfg);
+  const targetModel = `${(h.versionStamp?.model as any)?.provider}:${(h.versionStamp?.model as any)?.model}`;
+  console.log(`target ${targetModel}; baseline prompt matches mock: ${h.baselinePromptMatchesMock}; mock budget ${JSON.stringify(h.budget)}`);
+  const ctx = makeCtx(PILOT.strategy, cfg);
+  ctx.profile = { name: PILOT.name, cases: PILOT.cases, attemptsPerCase: PILOT.attemptsPerCase };
+  ctx.ledger.perSessionReserve = PILOT.perSessionReserve;
+  let stopped: string | null;
+  try {
+    const st = await runLoop(ctx, PILOT.strategy, PILOT.maxRounds);
+    stopped = st.stopped?.reason ?? null;
+  } catch (e) {
+    stopped = 'error: ' + (e as Error).message;
+    console.error(e);
+  } finally {
+    ctx.ledger.save();
+  }
+  const summary = summarisePilot(dir, { elapsedMs: Date.now() - t0, targetModel, models: cfg.models, stoppedReason: stopped });
+  const md = pilotMarkdown(summary);
+  const outDir = resolve(simulated ? join(dir, 'summary', 'pilot') : 'results/summary/pilot');
+  copyRoundFiles(join(dir, 'summary', PILOT.strategy), join(outDir, 'rounds'));
+  writeJson(join(outDir, 'pilot.json'), summary);
+  writeFileSync(join(outDir, 'pilot.md'), md);
+  const n = exportForLabelling(dir, simulated ? join(dir, 'pilot-to-label.json') : resolve('tests/fixtures/judge/pilot-to-label.json'));
+  console.log(md);
+  console.log(`\nwrote ${join(outDir, 'pilot.md')}; ${n} transcripts for labelling in ${simulated ? join(dir, 'pilot-to-label.json') : 'tests/fixtures/judge/pilot-to-label.json'}`);
+  const b = await makeCtx('health', cfg).adapter.budget();
+  console.log(`mock budget counter now ${b.requests} (limit ${b.limit})`);
+  if (sim) {
+    await new Promise<void>((r) => sim.app.close(() => r()));
+    sim.store.close();
   }
 }
 
@@ -232,6 +283,9 @@ async function main(): Promise<void> {
       return;
     case 'sim':
       await sim();
+      return;
+    case 'pilot':
+      await pilot(values.fresh === true, values.sim === true);
       return;
     case 'cases':
       console.log(TEST_CASES.map((t) => `${t.id} (${t.kind}): ${t.scenarios.join(', ')}`).join('\n'));

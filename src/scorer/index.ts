@@ -86,6 +86,8 @@ export interface TargetUsage {
   failedRequests: number;
   promptTokens: number;
   completionTokens: number;
+  /** Prompt tokens served from the provider's prompt cache (billed at a lower rate), when reported. */
+  cachedTokens?: number;
 }
 
 /** Target-model usage recorded in evidence. Failed provider requests also consumed a request slot. */
@@ -97,6 +99,7 @@ export function targetUsage(ev: Evidence | null | undefined): TargetUsage {
       const usage = (e.usage ?? {}) as Usage;
       u.promptTokens += usage.prompt_tokens ?? 0;
       u.completionTokens += usage.completion_tokens ?? 0;
+      u.cachedTokens = (u.cachedTokens ?? 0) + Number((usage.prompt_tokens_details as { cached_tokens?: number } | undefined)?.cached_tokens ?? 0);
     } else if (e.type === 'turn.error' && /^(provider_http|invalid_provider_response)|fetch failed|abort|timeout/i.test(String(e.reason))) {
       // A request that reached the network consumed a slot even though it failed.
       u.requests++;

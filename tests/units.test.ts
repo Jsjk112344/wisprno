@@ -149,3 +149,16 @@ test('ledger: the cap reserves room for sessions in flight', async () => {
   l.addTarget({ requests: 50, failedRequests: 0, promptTokens: 0, completionTokens: 0 });
   assert.throws(() => l.begin(), (e: unknown) => e instanceof CapReached); // 50 + 2*30 >= 100
 });
+
+test('replayN: capped replays stop the tally; inconclusive replays are topped up with fresh sessions', async () => {
+  let k = 0;
+  const capAfter3 = async () => (k++ < 3 ? { failed: false, inconclusive: false } : { failed: false, inconclusive: false, capped: true });
+  const c = await replayN(capAfter3, [], 20, 1);
+  assert.equal(c.runs, 3);
+  assert.equal(c.capped, 1);
+  let j = 0;
+  const flaky = async () => ({ failed: false, inconclusive: j++ < 4 });
+  const f = await replayN(flaky, [], 10, 1);
+  assert.equal(f.runs, 14);
+  assert.equal(f.runs - f.inconclusive, 10);
+});

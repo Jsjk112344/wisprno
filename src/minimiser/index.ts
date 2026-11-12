@@ -5,9 +5,11 @@ export interface ReplayTally {
   runs: number;
   fails: number;
   inconclusive: number;
+  /** Replays refused because the request cap was reached. Any capped replay leaves the tally undecided. */
+  capped?: number;
 }
 
-export type ReplayOnce = (lines: string[]) => Promise<{ failed: boolean; inconclusive: boolean }>;
+export type ReplayOnce = (lines: string[]) => Promise<{ failed: boolean; inconclusive: boolean; capped?: boolean }>;
 
 /**
  * Replay `lines` up to n times with `concurrency` in flight. With `needFails`, stop as soon as the threshold is reached
@@ -24,18 +26,26 @@ export async function replayN(
   const t: ReplayTally = { runs: 0, fails: 0, inconclusive: 0 };
   let started = 0;
   const decided = () => {
+    if (t.capped) return true;
     if (opts.stopOnFirstFail && t.fails > 0) return true;
     if (opts.needFails !== undefined) {
       if (t.fails >= opts.needFails) return true;
-      const remaining = n - t.runs - (started - t.runs);
-      if (t.fails + (started - t.runs) + remaining < opts.needFails) return true;
+      const inflight = started - t.runs - (t.capped ?? 0);
+      const remaining = n + Math.min(n, t.inconclusive) - started;
+      if (t.fails + inflight + remaining < opts.needFails) return true;
     }
     return false;
   };
   const worker = async () => {
-    while (started < n && !decided()) {
+    // Inconclusive replays (e.g. a provider error) are replaced by fresh sessions, up to n extra, so a decision rests
+    // on conclusive replays. Each replay is a new session; no paid turn is retried.
+    while (started < n + Math.min(n, t.inconclusive) && !decided()) {
       started++;
       const r = await once(lines);
+      if (r.capped) {
+        t.capped = (t.capped ?? 0) + 1;
+        continue;
+      }
       t.runs++;
       if (r.failed) t.fails++;
       else if (r.inconclusive) t.inconclusive++;
@@ -58,6 +68,8 @@ export interface MinimiseResult {
   /** Fails out of runs for the final script (at least 5 of 10 when reproducible). */
   final: ReplayTally;
   steps: MinimiseStep[];
+  /** The request cap stopped minimisation; the result is incomplete. */
+  capped?: boolean;
 }
 
 export const MIN_REPLAYS = 10;
@@ -69,6 +81,7 @@ export async function minimise(once: ReplayOnce, lines: string[], concurrency: n
   let current = [...lines];
   let tally = await check(current);
   steps.push({ removedIndex: null, lines: current, tally, kept: tally.fails >= MIN_FAILS });
+  if (tally.capped) return { reproducible: false, lines: current, final: tally, steps, capped: true };
   if (tally.fails < MIN_FAILS) return { reproducible: false, lines: current, final: tally, steps };
   let i = 0;
   let tried = 0;
@@ -78,6 +91,7 @@ export async function minimise(once: ReplayOnce, lines: string[], concurrency: n
     const t = await check(candidate);
     const kept = t.fails >= MIN_FAILS;
     steps.push({ removedIndex: i, lines: candidate, tally: t, kept });
+    if (t.capped) return { reproducible: true, lines: current, final: tally, steps, capped: true };
     if (kept) {
       current = candidate;
       tally = t;

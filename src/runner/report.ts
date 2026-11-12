@@ -58,7 +58,7 @@ export function buildReport(dir: string, opts: { simulated?: boolean } = {}): st
   const colors = { prompt: '#2563eb', checks: '#dc2626' };
   const series = STRATEGIES.flatMap((s) => [
     { name: `${s}: tool failures`, color: colors[s], points: R[s].map((r) => { const { k, n } = toolRate(r); const [lo, hi] = wilson(k, n); return { x: r.round, y: n ? k / n : 0, lo, hi }; }) },
-    { name: `${s}: normal completion`, color: colors[s], dash: '5 4', points: R[s].map((r) => ({ x: r.round, y: r.normal.n ? r.normal.completed / r.normal.n : 0 })) },
+    { name: `${s}: normal completion`, color: colors[s], dash: '5 4', points: R[s].filter((r) => r.normal).map((r) => ({ x: r.round, y: r.normal!.n ? r.normal!.completed / r.normal!.n : 0 })) },
   ]);
   writeFileSync(join(sum, 'chart.svg'), chartSvg(series, 'Recorded failure rate (tool test cases) and normal-call completion, by round', maxX));
   const dseries = STRATEGIES.map((s) => ({ name: `${s}: judged disclosure`, color: colors[s], points: R[s].map((r) => { const c = r.perCase.spoken_disclosure; const k = c?.judgedDisclosed ?? 0; const n = c?.n ?? 0; const [lo, hi] = wilson(k, n); return { x: r.round, y: n ? k / n : 0, lo, hi }; }) }));
@@ -97,7 +97,7 @@ export function buildReport(dir: string, opts: { simulated?: boolean } = {}): st
     for (const r of R[s]) {
       const fix = r.fixes.length ? r.fixes.map((f) => `${f.candidate ?? '-'} ${f.accepted ? 'accepted' : 'rejected'}`).join(', ') : r.stopped ? `stop: ${r.stopped}` : '-';
       const d = r.perCase.spoken_disclosure;
-      out.push(`| ${r.round} | ${r.versionTested} | ${TOOL_CASES.map((id) => `${r.perCase[id]?.recordedFailed ?? '-'}/${r.perCase[id]?.n ?? '-'}`).join(' | ')} | ${d ? `${d.judgedDisclosed}/${d.n} judged; ${d.recordedFailed} recorded` : '-'} | ${r.normal.completed}/${r.normal.n}, ${r.normal.meanTurns?.toFixed(1)} turns | ${r.chosen ?? '-'}${r.minimised ? ` (min. ${r.minimised.lines.length} lines, ${r.minimised.tally.fails}/${r.minimised.tally.runs}${r.minimised.reproducible ? '' : ', **weak reproduction**'}${r.minimised.before ? `; before ${r.minimised.before.fails}/${r.minimised.before.runs}` : ''})` : ''} | ${fix} |`);
+      out.push(`| ${r.round} | ${r.versionTested} | ${TOOL_CASES.map((id) => `${r.perCase[id]?.recordedFailed ?? '-'}/${r.perCase[id]?.n ?? '-'}`).join(' | ')} | ${d ? `${d.judgedDisclosed}/${d.n} judged; ${d.recordedFailed} recorded` : '-'} | ${r.normal ? `${r.normal.completed}/${r.normal.n}, ${r.normal.meanTurns?.toFixed(1)} turns` : 'not run (cap)'} | ${r.chosen ?? '-'}${r.minimised ? ` (min. ${r.minimised.lines.length} lines, ${r.minimised.tally.fails}/${r.minimised.tally.runs}${r.minimised.reproducible ? '' : ', **weak reproduction**'}${r.minimised.before ? `; before ${r.minimised.before.fails}/${r.minimised.before.runs}` : ''})` : ''} | ${fix} |`);
     }
     out.push('', 'Counts are failing attempts out of attempts. New failures per round: ' + R[s].map((r) => `r${r.round}: ${r.newFailures.join(', ') || 'none'}`).join('; ') + '. Reopened: ' + (R[s].flatMap((r) => r.reopenedFailures.map((x) => `r${r.round}: ${x}`)).join('; ') || 'none') + '.', '');
   }

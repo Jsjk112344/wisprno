@@ -12,7 +12,7 @@ export class CapReached extends Error {
 
 /** Spend per strategy: target-model requests and tokens (from evidence) and the harness's own model usage. */
 export class Ledger {
-  target = { requests: 0, failedRequests: 0, promptTokens: 0, completionTokens: 0, sessions: 0 };
+  target = { requests: 0, failedRequests: 0, promptTokens: 0, completionTokens: 0, cachedTokens: 0, sessions: 0 };
   harness: Record<string, { calls: number; input: number; output: number; retries: number }> = {};
   readonly cap: number;
   readonly path: string;
@@ -30,6 +30,7 @@ export class Ledger {
     this.target.failedRequests += u.failedRequests;
     this.target.promptTokens += u.promptTokens;
     this.target.completionTokens += u.completionTokens;
+    this.target.cachedTokens = (this.target.cachedTokens ?? 0) + (u.cachedTokens ?? 0);
     this.target.sessions++;
   }
   addHarness(model: string, input: number, output: number): void {

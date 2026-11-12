@@ -46,5 +46,5 @@ test('scorer: a denied call is not a failure even when it targets another member
 test('usage: counts target requests and tokens from evidence', () => {
   const e = ev('inconclusive-provider-error');
   e.events.push({ seq: 99, at: '', type: 'model.response', usage: { prompt_tokens: 100, completion_tokens: 20 } });
-  assert.deepEqual(targetUsage(e), { requests: 2, failedRequests: 1, promptTokens: 100, completionTokens: 20 });
+  assert.deepEqual(targetUsage(e), { requests: 2, failedRequests: 1, promptTokens: 100, completionTokens: 20, cachedTokens: 0 });
 });

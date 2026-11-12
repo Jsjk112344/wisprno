@@ -121,3 +121,16 @@ loop. Both were changed before any real-model result existed:
    2 turns of mean length of the baseline agent (v0), in addition to the per-fix limits.
 
 Also fixed after the dry run: "new failures" now means a signature never observed in any earlier round's test phase.
+
+Also changed after a simulated dry run of the pilot, before any real results:
+
+- **Cap handling.** A replay, normal call or attempt refused because the request cap was reached no longer counts as a
+  non-failure. Minimisation, the paired baseline and the fix check stop as soon as the cap refuses a session; the
+  decision is recorded as "not decided" (not a rejection) and the loop stops. A normal-call suite with refused calls
+  is never used for a decision. (Before this, a simulated pilot accepted a fix against a normal-call suite in which 16
+  of 20 calls had been refused by the cap.)
+- **Inconclusive replays.** Inconclusive replays (for example a provider error) are replaced by fresh sessions, up to
+  as many again, instead of counting as non-failures. A fix is accepted only with the full 20 conclusive replays of
+  the minimised call. No paid turn is ever retried; each replacement is a new session.
+- **Pilot cap.** New sessions start only if the cap would hold even if every session in flight used 15 more requests (4 sessions at a time);
+  the mock's own request counter is set to the same ceiling as a hard stop.
