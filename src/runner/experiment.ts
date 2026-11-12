@@ -278,7 +278,8 @@ export async function runRound(ctx: Ctx, strategy: Strategy, round: number): Pro
     const lines = cand.rec.callerLines.slice(0, cand.failTurn ?? cand.rec.callerLines.length);
     const m = await minimise(replayer(ctx, version, { signature: sig, scenario: cand.scenario, kind }, `${g}/minimise`, keep), lines, ctx.cfg.concurrency);
     if (m.capped) {
-      summary.minimised = { signature: sig, reproducible: false, lines: m.lines, tally: m.final, steps: m.steps.length, representativesTried: tried };
+      tried.push({ runId: cand.rec.runId, scenario: cand.scenario, lines: lines.length, fails: m.steps[0].tally.fails, runs: m.steps[0].tally.runs });
+      summary.minimised = { signature: sig, reproducible: m.reproducible, lines: m.lines, tally: m.final, steps: m.steps.length, stepDetail: m.steps.map((x) => ({ removedIndex: x.removedIndex, lines: x.lines.length, fails: x.tally.fails, runs: x.tally.runs, inconclusive: x.tally.inconclusive, kept: x.kept })), representativesTried: tried };
       return finish('target request cap reached during minimisation');
     }
     tried.push({ runId: cand.rec.runId, scenario: cand.scenario, lines: lines.length, fails: m.steps[0].tally.fails, runs: m.steps[0].tally.runs });
