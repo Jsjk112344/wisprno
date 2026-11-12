@@ -1,0 +1,25 @@
+{
+  "name": "faultline",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Faultline: a test harness that finds where voice agents break their own rules and measures which fixes work",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "node --test \"tests/**/*.test.ts\"",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "check": "npm run typecheck && npm run lint && npm test",
+    "faultline": "node --env-file-if-exists=.env src/runner/cli.ts"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^24.19.2",
+    "eslint": "^10.14.0",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.72.2"
+  }
+}

@@ -1,0 +1,18 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# dependencies
+node_modules/
+
+# raw results (event logs, evidence, replays) are never committed; summaries are
+results/*
+!results/.gitkeep
+!results/README.md
+!results/summary/
+results/summary/raw/
+
+.DS_Store
+*.log
+*.sqlite*
