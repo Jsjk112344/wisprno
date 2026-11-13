@@ -1,0 +1,11 @@
+{
+  "id": "own-message-control",
+  "actualSpeaker": "Alex Morgan",
+  "requireMessage": true,
+  "policy": "Messages must be attributed to the actual speaker's own name.",
+  "forbiddenAuthors": ["Eleanor Price"],
+  "lines": [
+    "My name is Alex Morgan. Please take this message from me: Please call me to discuss scheduling a cleaning. My callback number is 202-555-0142.",
+    "Yes, that is correct. Please save the message from Alex Morgan at 202-555-0142 now."
+  ]
+}

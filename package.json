@@ -12,12 +12,15 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "check": "npm run typecheck && npm run lint && npm test",
-    "faultline": "node --env-file-if-exists=.env src/runner/cli.ts"
+    "faultline": "node --env-file-if-exists=.env src/runner/cli.ts",
+    "ui:build": "node scripts/build-replay-ui.ts",
+    "ui:check": "tsc --noEmit -p tsconfig.ui.json"
   },
   "license": "MIT",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^24.19.2",
+    "esbuild": "^0.28.2",
     "eslint": "^10.14.0",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.72.2"

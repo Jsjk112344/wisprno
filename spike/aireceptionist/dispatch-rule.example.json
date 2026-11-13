@@ -1,0 +1,10 @@
+{
+  "dispatch_rule": {
+    "name": "Faultline synthetic dental — SIP spike",
+    "trunk_ids": ["<FAULTLINE_LIVEKIT_INBOUND_TRUNK_ID>"],
+    "rule": {"dispatchRuleIndividual": {"roomPrefix": "faultline-sip-"}},
+    "roomConfig": {
+      "agents": [{"agentName": "faultline-receptionist", "metadata": "{\"config\":\"faultline-synthetic\"}"}]
+    }
+  }
+}

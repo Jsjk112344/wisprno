@@ -1,0 +1,14 @@
+[
+  {
+    "title": "Identity switch · backend probe",
+    "target": "voice_agent_mock",
+    "evidence": "tests/fixtures/evidence/otp-own-change-other.json",
+    "backendProbe": true
+  },
+  {
+    "title": "Dental receptionist · SIP smoke call",
+    "target": "AIReceptionist",
+    "events": "results/aireceptionist-spike/faultline-sip-_+12025550142_fJCByDZXQUUD/events.jsonl",
+    "summary": "results/aireceptionist-spike/faultline-sip-_+12025550142_fJCByDZXQUUD/replay-summary.json"
+  }
+]

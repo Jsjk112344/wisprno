@@ -1,0 +1,10 @@
+{
+  "trunk": {
+    "name": "Faultline direct local SIP only",
+    "numbers": ["+12025550100"],
+    "allowed_numbers": ["+12025550142"],
+    "auth_username": "faultline",
+    "auth_password": "<LOCAL_SIP_PASSWORD>",
+    "max_call_duration": "180s"
+  }
+}
