@@ -36,3 +36,8 @@ small.inconclusive-text{display:block;margin-top:6px;font-size:10px}
 .caption{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
 .thinking-line small{white-space:nowrap;flex-shrink:0}
 .drawer h2{overflow-wrap:anywhere}
+.breach-vignette{position:absolute;inset:0;pointer-events:none;z-index:3;border-radius:inherit;opacity:0;transition:opacity .8s ease;box-shadow:inset 0 0 90px 10px rgba(239,68,68,.38),inset 0 0 0 1px rgba(239,68,68,.55);background:radial-gradient(ellipse at center,#0000 55%,rgba(239,68,68,.16) 100%)}
+.breach-vignette.on{opacity:1}
+.breach-vignette.flash{animation:breach-flare 1.6s ease-out}
+@keyframes breach-flare{0%{opacity:0}12%{opacity:1;box-shadow:inset 0 0 160px 40px rgba(239,68,68,.6),inset 0 0 0 2px rgba(239,68,68,.9)}100%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.breach-vignette.flash{animation:none}}

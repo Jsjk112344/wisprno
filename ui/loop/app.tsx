@@ -80,7 +80,7 @@ function App() {
   const [t, setT] = useState(() => Math.max(0, Number(hash.get('t')) || 0));
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
-  const [sound, setSound] = useState(false);
+  const [sound, setSound] = useState(true); // pressing Play is the user gesture browsers need for audio
   const [drawer, setDrawer] = useState<null | 'bench' | 'repo' | 'node' | 'finding'>(
     () => DRAWERS.find((name) => name === hash.get('drawer')) ?? null);
   const [findingId, setFindingId] = useState<string | null>(null);
@@ -189,6 +189,24 @@ function App() {
     window.speechSynthesis.speak(utterance);
   }, []);
 
+  // A recorded story with one whole-call recording (SIP) plays it continuously, locked to the playhead, so pauses,
+  // ringing and the agent's thinking time are heard as they happened.
+  const callUrl = !growing && story.audio ? Object.values(story.audio).find(Boolean) : undefined;
+  useEffect(() => {
+    if (!callUrl) return;
+    if (!playing || !sound) { audioRef.current?.pause(); return; }
+    let audio = audioRef.current;
+    if (!audio || audio.dataset.src !== callUrl) {
+      audio?.pause();
+      audio = new Audio(callUrl);
+      audio.dataset.src = callUrl;
+      audioRef.current = audio;
+    }
+    audio.playbackRate = speed;
+    if (Math.abs(audio.currentTime - t) > 0.6) audio.currentTime = t;
+    if (audio.paused && t < (audio.duration || Infinity)) void audio.play().catch(() => undefined);
+  }, [callUrl, playing, sound, speed, t]);
+
   // Sound for events crossed by the playhead: recorded audio when the story has it; synthesised voice only for
   // text-mode stories (which have no audio); never synthesise a SIP call.
   useEffect(() => {
@@ -199,6 +217,7 @@ function App() {
     if (!soundRef.current) return;
     for (const e of crossed) {
       if (e.type === 'say') {
+        if (callUrl) continue; // the whole call is already playing
         if (e.audio && playClip(e)) continue;
         if (story.transport === 'text') synthesise(e.text, e.speaker);
       }
@@ -217,7 +236,7 @@ function App() {
         } catch { /* no audio */ }
       }
     }
-  }, [t, events, playing, growing, story, playClip, synthesise, stopAudio]);
+  }, [t, events, playing, growing, story, callUrl, playClip, synthesise, stopAudio]);
 
   const seek = useCallback((at: number) => {
     setPlaying(false); stopAudio(); setT(at);
@@ -368,6 +387,8 @@ function App() {
   const lastSay = view.history.at(-1);
   const speaking = (playing || (growing && following)) && !!lastSay && t - lastSay.at < 4;
   const fixedServer = view.fixed?.kind === 'server-check';
+  const breachOpen = hasFinding && !view.fixed;
+  const breachFlash = breachOpen && !!lastFinding && t - lastFinding.at >= 0 && t - lastFinding.at < 1.6;
   const afterTotal = (version: string | null | undefined) => totals.after.get(version ?? '?') ?? 0;
   const normalTotal = (version: string | null | undefined) => totals.normal.get(version ?? '?') ?? 0;
   const gate = view.fixed ? aggregate(view.acceptedAfter) : 'untested';
@@ -582,6 +603,8 @@ function App() {
             </div>
           </div>
           <div className="graph-wrap">
+            {/* Red vignette while a recorded breach stands (until a fix is accepted); it flares when the breach lands. */}
+            <div className={`breach-vignette${breachOpen ? ' on' : ''}${breachFlash ? ' flash' : ''}`} aria-hidden="true" />
             <div className="graph-heading">
               <span className="map-label"><Icon name="layers" size={14} />Permission map <span>{map.nodesCount} nodes · {map.toolsCount} tools</span></span>
               <div className="map-status"><i className={playing || liveRunning || (growing && following && t < queueEnd) ? 'pulsing' : ''} />{mapStatus}</div>
