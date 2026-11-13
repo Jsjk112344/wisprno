@@ -101,6 +101,7 @@ export interface Story {
   sources: { path: string; sha256: string }[];
   notes: string[]; // honest caveats shown in the UI (e.g. "impersonation from the first line")
   audio?: Record<string, string>; // id -> data: URL (playback snapshot) or server URL (served mode)
+  voiced?: { model: string; note: string }; // a text-mode story whose lines are read by TTS (not a recording)
 }
 
 /** Assign presentation times: a fixed pace per event type, so playback is legible with the sound off. */

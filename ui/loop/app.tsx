@@ -191,7 +191,7 @@ function App() {
 
   // A recorded story with one whole-call recording (SIP) plays it continuously, locked to the playhead, so pauses,
   // ringing and the agent's thinking time are heard as they happened.
-  const callUrl = !growing && story.audio ? Object.values(story.audio).find(Boolean) : undefined;
+  const callUrl = !growing && story.transport === 'sip' && story.audio ? Object.values(story.audio).find(Boolean) : undefined;
   useEffect(() => {
     if (!callUrl) return;
     if (!playing || !sound) { audioRef.current?.pause(); return; }
@@ -369,7 +369,7 @@ function App() {
     stopAudio();
     if (clips.length === lines.length) {
       const next = (i: number) => { if (i < clips.length) playClip(clips[i], () => next(i + 1)); };
-      next(0); toast('Playing recorded shortest call');
+      next(0); toast(story.voiced ? 'Playing shortest call · TTS voices' : 'Playing recorded shortest call');
     } else if (story.transport === 'text' && window.speechSynthesis) {
       lines.forEach((line) => synthesise(line, 'red', true));
       toast('Playing shortest call · synthesised voice');
@@ -724,7 +724,7 @@ function App() {
                 <b>{view.speaker === 'agent' ? map.agent.label.toUpperCase() : judge ? 'JUDGE' : story.caller.name.toUpperCase()}</b>
                 <span>{speaking ? 'Speaking' : view.speaker ? 'Caption' : 'Ready'}</span>
                 {view.say?.heardBy === 'stt' && <span className="meta-chip">heard via STT</span>}
-                {view.say?.audio && story.audio?.[view.say.audio.src] && <span className="meta-chip">recorded audio</span>}
+                {view.say?.audio && story.audio?.[view.say.audio.src] && <span className="meta-chip">{story.voiced ? 'voiced by TTS · words as recorded' : 'recorded audio'}</span>}
                 {synthVoice && <span className="meta-chip">synthesised voice</span>}
                 {view.keys && <span className="meta-chip">DTMF {view.keys.digits}</span>}
               </div>

@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { experimentStory } from '../src/loop/from-experiment.ts';
 import { sipStory } from '../src/loop/from-sip.ts';
+import { attachVoices } from '../src/loop/voices.ts';
 import type { Story } from '../src/loop/story.ts';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
@@ -19,7 +20,7 @@ export function buildStories(opts: { rounds?: string[]; sipDirs?: string[]; audi
   for (const r of rounds) {
     const [strategy, n] = r.split(':');
     if (strategy !== 'checks' && strategy !== 'prompt') throw new Error('--round checks:N | prompt:N');
-    stories.push(experimentStory({ root, strategy, round: Number(n) }));
+    stories.push(attachVoices(root, experimentStory({ root, strategy, round: Number(n) })));
   }
   for (const d of sipDirs) stories.push(sipStory(root, resolve(d)));
   for (const s of stories) {

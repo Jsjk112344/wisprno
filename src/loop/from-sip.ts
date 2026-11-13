@@ -3,7 +3,7 @@
 // call was answered), so the mixed call recording plays in sync. Attack only: no shrink, replay or fix has run on SIP.
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, renameSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { SIP_SCENARIOS, type SipScenario } from '../sip/scenario.ts';
 import { readJsonl } from './from-experiment.ts';
@@ -11,13 +11,19 @@ import type { DraftEvent, Marker, Story, UiEvent } from './story.ts';
 
 /** Mix both sides of the call (what the caller sent, what it heard) into one MP3 next to the recordings. */
 export function ensureCallMix(dir: string): string | null {
-  const out = join(dir, 'call.mp3');
-  if (existsSync(out)) return out;
+  const out = join(dir, 'call-clean.mp3');
+  if (existsSync(out) && statSync(out).size > 0) return out;
   const wavs = readdirSync(dir).filter((f) => /^dump-.*-(enc|dec)\.wav$/.test(f));
   const enc = wavs.find((f) => f.endsWith('-enc.wav'));
   const dec = wavs.find((f) => f.endsWith('-dec.wav'));
   if (!enc || !dec) return null;
-  execFileSync('ffmpeg', ['-loglevel', 'error', '-i', join(dir, enc), '-i', join(dir, dec), '-filter_complex', 'amix=inputs=2:duration=longest:normalize=0', '-ac', '1', '-ar', '16000', '-b:a', '32k', out]);
+  // Both legs are 8 kHz G.711 phone audio. Keep the speech band, take out hiss, even out levels, then upsample
+  // cleanly; nothing is added or removed in time, so the story clock still lines up.
+  const leg = 'highpass=f=120,lowpass=f=3700,afftdn=nf=-35,dynaudnorm=f=200:g=11:m=8';
+  execFileSync('ffmpeg', ['-loglevel', 'error', '-i', join(dir, enc), '-i', join(dir, dec), '-filter_complex',
+    `[0]${leg}[a];[1]${leg}[b];[a][b]amix=inputs=2:duration=longest:normalize=0,aresample=24000:filter_size=64,alimiter=limit=0.9`,
+    '-ac', '1', '-b:a', '64k', '-y', out + '.tmp.mp3']);
+  renameSync(out + '.tmp.mp3', out); // never leave a half-written mix that a later build would trust
   return out;
 }
 
