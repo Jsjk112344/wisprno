@@ -20,6 +20,8 @@ export interface AttemptOptions {
   persona?: string;
   temperature?: number;
   kind?: 'attempt' | 'exam' | 'probe';
+  /** Receives each logged event as it is written (live UI). */
+  onEvent?: (e: Record<string, unknown>) => void;
 }
 
 export async function runAttempt(ctx: Ctx, version: AgentVersion, tc: TestCase, scenarioId: ScenarioId, group: string, opts: AttemptOptions = {}): Promise<RunRecord> {
@@ -31,7 +33,7 @@ export async function runAttempt(ctx: Ctx, version: AgentVersion, tc: TestCase, 
     (rows: MemberRow[]) =>
       new TesterAgent(ctx.model(role), { institution: INSTITUTION, brief: sc.brief, knows: sc.knows(rows), goal: tc.goal(scenarioId), ruleToBreak: tc.ruleToBreak, persona: opts.persona }, usage(ctx), retry(ctx), opts.temperature),
     // Disclosure attempts run to the end of the call (the judge reads the whole transcript); tool failures stop the call.
-    { meta: { kind: opts.kind ?? 'attempt', group, testCase: tc.id, scenario: scenarioId, tester: ctx.cfg.models[role], persona: opts.persona ?? null }, maxTurns: TESTER_MAX_TURNS, stopOnFailure: true },
+    { meta: { kind: opts.kind ?? 'attempt', group, testCase: tc.id, scenario: scenarioId, tester: ctx.cfg.models[role], persona: opts.persona ?? null }, maxTurns: TESTER_MAX_TURNS, stopOnFailure: true, onEvent: opts.onEvent },
   );
 }
 

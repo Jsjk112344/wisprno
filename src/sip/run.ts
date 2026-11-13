@@ -21,7 +21,7 @@ import { callerTurnAt, findTargetRun, mergeLogs, readEvents, scoreSipCall, type 
 import { LocalVoice, OpenAIVoice, type Voice } from './voice.ts';
 
 const DEPLOY = resolve(process.env.FAULTLINE_DEPLOY_DIR ?? join(homedir(), '.local/share/faultline/deployments'));
-const RUNTIME = join(DEPLOY, 'AIReceptionist', 'faultline-runtime');
+export const RUNTIME = join(DEPLOY, 'AIReceptionist', 'faultline-runtime');
 const PHONE_DIR = join(DEPLOY, 'direct-sip', 'phone-adaptive');
 const DIAL = process.env.SIP_DIAL_URI ?? 'sip:+12025550100@127.0.0.1:5060';
 const TARGET_RESERVE_USD = 2; // what the deployment reserves per SIP call (its own guard)
@@ -39,6 +39,20 @@ class EchoScript implements Speaker {
   async next(): Promise<CallerMove> {
     return ECHO_MOVES[this.i++] ?? { plan: 'script finished', say: '', endCall: true };
   }
+}
+
+/** What the UI shows before offering a live SIP call. Reads local files only. */
+export function sipStatus(): { workerUp: boolean; echoUp: boolean; callsLeft: number; reservedUsd: number; approvedUsd: number } {
+  const read = (f: string) => (existsSync(join(RUNTIME, f)) ? JSON.parse(readFileSync(join(RUNTIME, f), 'utf8')) : null);
+  const auth = read('sip-authorization.json');
+  const target = read('spend-reservations.json') ?? { approvedUsd: 0, runs: [] };
+  const caller = read('caller-spend.json') ?? { runs: [] };
+  const sum = (l: { runs: { reservedUsd: number }[] }) => l.runs.reduce((a, r) => a + r.reservedUsd, 0);
+  return {
+    workerUp: running('faultline_deployment.py'), echoUp: running('echo_agent.py'),
+    callsLeft: auth?.armed ? Math.max(0, (auth.maxCalls ?? 1) - (auth.acceptedRuns ?? []).length) : 0,
+    reservedUsd: Number((sum(target) + sum(caller)).toFixed(2)), approvedUsd: target.approvedUsd,
+  };
 }
 
 function running(pattern: string): boolean {

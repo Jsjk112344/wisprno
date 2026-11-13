@@ -9,19 +9,24 @@
   },
   "scripts": {
     "test": "node --test \"tests/**/*.test.ts\"",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.loop.json",
     "lint": "eslint .",
     "check": "npm run typecheck && npm run lint && npm test",
     "faultline": "node --env-file-if-exists=.env src/runner/cli.ts",
     "ui:build": "node scripts/build-replay-ui.ts",
-    "ui:check": "tsc --noEmit -p tsconfig.ui.json"
+    "ui:check": "tsc --noEmit -p tsconfig.ui.json",
+    "ui:loop": "node scripts/build-loop-ui.ts"
   },
   "license": "MIT",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^24.19.2",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
     "esbuild": "^0.28.2",
     "eslint": "^10.14.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.72.2"
   }

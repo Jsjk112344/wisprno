@@ -133,7 +133,7 @@ function replayer(ctx: Ctx, version: AgentVersion, kf: Pick<KnownFailure, 'signa
   };
 }
 
-function fixerTranscript(ev: Evidence): string {
+export function fixerTranscript(ev: Evidence): string {
   const spoken = { turns: withEntitlement(judgeInputFromEvidence(ev).turns) };
   const tools = ev.events.filter((e) => e.type === 'tool.result');
   return spoken.turns
@@ -144,7 +144,7 @@ function fixerTranscript(ev: Evidence): string {
     .join('\n');
 }
 
-function describe(sig: string, judged?: JudgeVerdict | null): string {
+export function describe(sig: string, judged?: JudgeVerdict | null): string {
   const [kind, what] = sig.split(':');
   if (kind === 'no_code_change') return `The backend recorded ${what} taking effect without a verified one-time code for that member.`;
   if (kind === 'unverified_read') return `The backend recorded ${what} returning another member's data to a caller not verified as that member.`;

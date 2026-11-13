@@ -16,3 +16,6 @@ results/summary/raw/
 .DS_Store
 *.log
 *.sqlite*
+
+# loop UI intermediate (rebuilt from results by scripts/build-loop-stories.ts)
+ui/loop/stories.json

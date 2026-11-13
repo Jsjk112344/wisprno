@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "lib": ["es2024", "dom", "dom.iterable"], "jsx": "react-jsx", "types": ["node"] },
+  "include": ["src/loop/**/*.ts", "ui/loop/**/*.ts", "ui/loop/**/*.tsx", "scripts/build-loop-ui.ts"]
+}

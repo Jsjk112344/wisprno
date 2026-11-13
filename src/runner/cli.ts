@@ -1,8 +1,6 @@
 // Faultline CLI. Usage: npm run faultline -- <command> [--flags]
 import { readFileSync, rmSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { randomBytes } from 'node:crypto';
-import { pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
 import { agreement, judgeDisclosure, membersSummary, type JudgeTurn } from '../judge/index.ts';
 import { minimise } from '../minimiser/index.ts';
@@ -15,6 +13,8 @@ import { baselineVersion, loadState, runLoop, runRound, BASELINE_PROMPT, type St
 import { buildReport } from './report.ts';
 import { PILOT, copyRoundFiles, exportForLabelling, pilotMarkdown, summarisePilot } from './pilot.ts';
 import { pool, readJson, sha256, writeJson } from './util.ts';
+import { startSimServer as startSim } from '../sim/server.ts';
+const startSimServer = (dir: string, limit: number) => startSim(dir, limit, MOCK_DIR);
 
 const { positionals, values } = parseArgs({
   allowPositionals: true,
@@ -34,6 +34,7 @@ const { positionals, values } = parseArgs({
     profile: { type: 'string' },
     cap: { type: 'string' },
     mode: { type: 'string' },
+    port: { type: 'string' },
   },
 });
 const MOCK_DIR = resolve(process.env.MOCK_DIR ?? '../voice_agent_mock');
@@ -131,22 +132,6 @@ async function minimiseProbe(cfg: Config, caseId: string, n: number) {
   const out = { signature: f.sig, reproducible: m.reproducible, from: f.lines, to: m.lines, final: m.final, steps: m.steps.map((s) => ({ removed: s.removedIndex, len: s.lines.length, tally: s.tally, kept: s.kept })) };
   writeJson(join(cfg.resultsDir, 'summary', 'minimise-probe.json'), out);
   return out;
-}
-
-/** Real mock server in-process (loopback, temp DB) with the simulated target, plus sim harness models. */
-async function startSimServer(dir: string, limit: number) {
-  const { server } = await import(pathToFileURL(join(MOCK_DIR, 'src', 'server.mjs')).href);
-  const { Store } = await import(pathToFileURL(join(MOCK_DIR, 'src', 'store.mjs')).href);
-  const { simTarget } = await import('../sim/target.ts');
-  const store = new Store(join(dir, 'mock.sqlite'));
-  const token = randomBytes(32).toString('hex');
-  const app = server({ store, provider: simTarget({ reserve: () => store.reserve(limit) }), adminToken: token, requestLimit: limit });
-  await new Promise<void>((r) => app.listen(0, '127.0.0.1', () => r()));
-  const cfg = loadConfig({
-    TARGET_URL: `http://127.0.0.1:${app.address().port}`, TARGET_ADMIN_TOKEN: token, CONCURRENCY: process.env.CONCURRENCY ?? '8', TARGET_REQUEST_CAP: '20000', RESULTS_DIR: dir,
-    TESTER_MODEL: 'sim:tester', CALLER_MODEL: 'sim:caller', FIXER_MODEL: 'sim:fixer', JUDGE_MODEL: 'sim:judge', EXAM_TESTER_MODEL: 'sim:exam-tester',
-  });
-  return { app, store, cfg };
 }
 
 /** The whole workflow locally: real mock server (in-process, loopback, temp DB) with simulated models. No network. */
@@ -319,11 +304,20 @@ async function main(): Promise<void> {
       console.log(JSON.stringify(await sipCallCommand({ mode: values.mode ?? '', scenario: values.scenario }), null, 2));
       return;
     }
+    case 'ui': {
+      // Loop UI: recorded playback plus live runs and judge mode. Loopback only.
+      const { startUiServer } = await import('../loop/server.ts');
+      const { buildStories } = await import('../../scripts/build-loop-stories.ts');
+      const root = resolve('.');
+      const ui = await startUiServer({ root, port: Number(values.port ?? 4320), sim: values.sim === true, page: join(root, 'Faultline_Loop.html'), stories: () => buildStories() });
+      console.log(`Faultline loop UI: ${ui.url}${values.sim ? '  (simulated target and models, $0)' : ''}`);
+      return;
+    }
     case 'cases':
       console.log(TEST_CASES.map((t) => `${t.id} (${t.kind}): ${t.scenarios.join(', ')}`).join('\n'));
       return;
     default:
-      console.log('commands: health | judge-validate | normal [--strategy --version] | probe --case --n | minimise-probe --case | round --strategy [--round] | loop --strategy [--rounds] | exam --strategy | report | sim [--rounds --exam-n] | cases | sip-call --mode echo|live [--scenario]');
+      console.log('commands: health | judge-validate | normal [--strategy --version] | probe --case --n | minimise-probe --case | round --strategy [--round] | loop --strategy [--rounds] | exam --strategy | report | sim [--rounds --exam-n] | cases | sip-call --mode echo|live [--scenario] | ui [--sim] [--port]');
   }
 }
 

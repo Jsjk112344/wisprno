@@ -1,0 +1,198 @@
+// Local server for the loop UI (127.0.0.1 only): serves the built page, its recorded stories, live runs as server-sent
+// events, and judge sessions. `npm run faultline -- ui [--sim] [--port 4320]`.
+//   --sim  runs the real mock server in-process with simulated models: $0, for rehearsing the live loop.
+//   default uses TARGET_URL (our running voice_agent_mock) and the configured models; each live loop costs model calls.
+// The SIP call path is the same gated command as `sip-call --mode live` (authorization + both budget ledgers).
+import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
+import { existsSync, mkdirSync, readFileSync, readdirSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { loadConfig, makeCtx, type Ctx } from '../runner/context.ts';
+import { readEvents, findTargetRun, mergeLogs } from '../sip/target.ts';
+import { SIP_SCENARIOS } from '../sip/scenario.ts';
+import { RUNTIME, sipCallCommand, sipStatus } from '../sip/run.ts';
+import { sipHeader, sipStory, translateSipRows } from './from-sip.ts';
+import { JudgeSession } from './judge.ts';
+import { LiveRun, runLiveLoop } from './live.ts';
+import type { LiveMessage, ServerStatus, Story } from './story.ts';
+
+export interface UiServerOptions {
+  root: string;
+  port: number;
+  sim: boolean;
+  page: string; // built HTML
+  stories: () => Story[];
+}
+
+const json = (res: ServerResponse, code: number, body: unknown) => {
+  res.writeHead(code, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+  res.end(JSON.stringify(body));
+};
+
+async function body(req: IncomingMessage): Promise<any> {
+  let s = '';
+  for await (const c of req) {
+    s += c;
+    if (s.length > 1e5) throw new Error('request too large');
+  }
+  return s ? JSON.parse(s) : {};
+}
+
+export async function startUiServer(o: UiServerOptions) {
+  let ctx: Ctx;
+  let stopSim: (() => void) | null = null;
+  if (o.sim) {
+    const dir = join(tmpdir(), `faultline-ui-sim-${Date.now()}`);
+    mkdirSync(dir, { recursive: true });
+    const { startSimServer } = await import('../sim/server.ts');
+    const sim = await startSimServer(dir, 1_000_000);
+    ctx = makeCtx('live', { ...sim.cfg, concurrency: 4 });
+    stopSim = () => sim.app.close();
+  } else {
+    ctx = makeCtx('live', loadConfig());
+  }
+  ctx.log = (m) => console.log(`[live] ${m}`);
+  const runs = new Map<string, LiveRun>();
+  const judges = new Map<string, JudgeSession>();
+  let busy: LiveRun | null = null;
+
+  const status = async (): Promise<ServerStatus> => {
+    const up = await ctx.adapter.health().then(() => true, () => false);
+    const s = sipStatus();
+    return { served: true, mock: { up, url: ctx.cfg.targetUrl }, sip: { workerUp: s.workerUp && !s.echoUp, callsLeft: s.callsLeft, reservedUsd: s.reservedUsd, approvedUsd: s.approvedUsd }, sim: o.sim };
+  };
+
+  const startLoop = (run: LiveRun) => {
+    runLiveLoop(ctx, run, { caseId: 'lost_card', maxAttempts: 4, replays: 10, normalCalls: 6, maxFixes: 2, sim: o.sim })
+      .catch((e) => run.send({ kind: 'error', message: (e as Error).message }))
+      .finally(() => {
+        ctx.ledger.save();
+        busy = null;
+      });
+  };
+
+  const startSip = (run: LiveRun) => {
+    if (o.sim) {
+      run.send({ kind: 'error', message: 'SIP calls are real calls; start the server without --sim to place one.' });
+      busy = null;
+      return;
+    }
+    const sipRoot = join(o.root, 'results', 'sip');
+    const before = new Set(existsSync(sipRoot) ? readdirSync(sipRoot) : []);
+    const scenario = SIP_SCENARIOS.message_authorship;
+    const sent = new Set<string>();
+    let headerSent = false;
+    // Poll the growing caller log and the deployment's log for this call; emit each newly translated event once.
+    const poll = () => {
+      const dir = existsSync(sipRoot) ? readdirSync(sipRoot).filter((d) => !before.has(d) && d.endsWith('-live')).map((d) => join(sipRoot, d)).at(-1) : undefined;
+      const callerLog = dir && join(dir, 'caller-events.jsonl');
+      if (!callerLog || !existsSync(callerLog)) return;
+      const caller = readEvents(callerLog);
+      const callId = caller.find((e) => e.type === 'call.established')?.callId;
+      const targetDir = callId ? findTargetRun(join(RUNTIME, 'runs'), callId) : null;
+      const target = targetDir ? readEvents(join(targetDir, 'events.jsonl')) : [];
+      const runId = String(caller[0]?.runId ?? run.id);
+      const rows = mergeLogs(runId, caller, target).map((e, i) => ({ e, line: i + 1 }));
+      if (!headerSent) {
+        headerSent = true;
+        run.send({ kind: 'story', story: { ...sipHeader(rows, scenario), id: 'live-sip-' + run.id, markers: [], duration: 0, sources: [] } });
+      }
+      const { events } = translateSipRows({ root: o.root, eventsFile: callerLog, rows, scenario, runId, mix: false });
+      for (const ev of events) {
+        const key = `${ev.type}|${ev.ref?.t ?? ''}|${(ev as any).text ?? (ev as any).tool ?? (ev as any).value ?? ''}`;
+        if (sent.has(key)) continue;
+        sent.add(key);
+        run.event({ ...ev, at: ev.at } as any);
+      }
+    };
+    const timer = setInterval(() => {
+      try {
+        poll();
+      } catch (e) {
+        console.error('[sip poll]', e);
+      }
+    }, 1000);
+    sipCallCommand({ mode: 'live', scenario: 'message_authorship', resultsDir: join(o.root, 'results') })
+      .then((summary: any) => {
+        poll();
+        const final = sipStory(o.root, String(summary.dir));
+        const verdict = final.events.findLast((e) => e.type === 'verdict');
+        if (verdict) run.event({ ...verdict, at: verdict.at } as any);
+        run.send({ kind: 'done', verdict: summary.outcome === 'fail' ? 'breached' : summary.outcome === 'pass' ? 'held' : 'inconclusive', summary: `SIP call ${summary.callId}: ${summary.outcome}${summary.inconclusiveReason ? ' (' + summary.inconclusiveReason + ')' : ''}` });
+      })
+      .catch((e) => run.send({ kind: 'error', message: (e as Error).message }))
+      .finally(() => {
+        clearInterval(timer);
+        busy = null;
+      });
+  };
+
+  const server = createServer(async (req, res) => {
+    try {
+      const url = new URL(req.url ?? '/', 'http://127.0.0.1');
+      const parts = url.pathname.split('/').filter(Boolean);
+      if (req.method === 'GET' && (url.pathname === '/' || url.pathname === '/index.html')) {
+        if (!existsSync(o.page)) return json(res, 500, { error: `page not built: ${o.page} (npm run ui:loop)` });
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
+        return res.end(readFileSync(o.page));
+      }
+      if (req.method === 'GET' && url.pathname === '/api/status') return json(res, 200, await status());
+      if (req.method === 'GET' && url.pathname === '/api/stories') return json(res, 200, o.stories());
+      if (req.method === 'POST' && url.pathname === '/api/live') {
+        const { mode } = await body(req);
+        if (mode !== 'loop' && mode !== 'sip') return json(res, 400, { error: "mode must be 'loop' or 'sip'" });
+        if (busy && !busy.done) return json(res, 409, { error: 'a live run is already in progress', id: busy.id });
+        if (mode === 'loop' && !(await status()).mock.up) return json(res, 503, { error: `mock target not reachable at ${ctx.cfg.targetUrl}` });
+        const run = new LiveRun(mode);
+        runs.set(run.id, run);
+        busy = run;
+        if (mode === 'loop') startLoop(run);
+        else startSip(run);
+        return json(res, 200, { id: run.id });
+      }
+      if (req.method === 'GET' && parts[0] === 'api' && parts[1] === 'live' && parts[3] === 'stream') {
+        const run = runs.get(parts[2]);
+        if (!run) return json(res, 404, { error: 'no such run' });
+        res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-store', Connection: 'keep-alive' });
+        const write = (m: LiveMessage) => {
+          res.write(`data: ${JSON.stringify(m)}\n\n`);
+          if (m.kind === 'done' || m.kind === 'error') res.end();
+        };
+        const off = run.subscribe(write);
+        const ping = setInterval(() => res.write(': ping\n\n'), 15_000);
+        req.on('close', () => {
+          off();
+          clearInterval(ping);
+        });
+        return;
+      }
+      if (req.method === 'POST' && url.pathname === '/api/judge/start') {
+        if (!(await status()).mock.up) return json(res, 503, { error: `mock target not reachable at ${ctx.cfg.targetUrl}` });
+        const j = new JudgeSession(ctx);
+        const events = await j.start();
+        judges.set(j.id, j);
+        const { mockHeader } = await import('./live.ts');
+        return json(res, 200, { id: j.id, story: { ...mockHeader('lock_card', 'Judge mode', o.sim), title: 'Judge mode · original target', caller: { name: 'You', short: 'You', tactic: 'Judge', initials: 'YOU' } }, events });
+      }
+      if (req.method === 'POST' && parts[0] === 'api' && parts[1] === 'judge' && parts[3] === 'turn') {
+        const j = judges.get(parts[2]);
+        if (!j) return json(res, 404, { error: 'no such judge session' });
+        const { text } = await body(req);
+        if (typeof text !== 'string' || !text.trim() || text.length > 1000) return json(res, 400, { error: 'text required (≤1000 chars)' });
+        return json(res, 200, { events: await j.say(text.trim()) });
+      }
+      json(res, 404, { error: 'not found' });
+    } catch (e) {
+      console.error(e);
+      json(res, 500, { error: (e as Error).message });
+    }
+  });
+  await new Promise<void>((r) => server.listen(o.port, '127.0.0.1', () => r()));
+  return {
+    url: `http://127.0.0.1:${o.port}/`,
+    close: () => {
+      server.close();
+      stopSim?.();
+    },
+  };
+}

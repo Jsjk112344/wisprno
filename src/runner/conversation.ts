@@ -56,12 +56,16 @@ export async function runCall(
   ctx: Ctx,
   setup: CallSetup,
   makeSpeaker: (rows: MemberRow[]) => Speaker,
-  opts: { meta: RunMeta; maxTurns: number; stopOnFailure: boolean },
+  opts: { meta: RunMeta; maxTurns: number; stopOnFailure: boolean; onEvent?: (e: Record<string, unknown>) => void },
 ): Promise<RunRecord> {
   const runId = randomUUID();
   const dir = join(ctx.rawDir, opts.meta.group);
   const eventsPath = join(dir, 'events', runId + '.jsonl');
-  const ev = (data: Record<string, unknown>) => appendLine(eventsPath, { t: new Date().toISOString(), runId, ...data });
+  const ev = (data: Record<string, unknown>) => {
+    const line = { t: new Date().toISOString(), runId, ...data };
+    appendLine(eventsPath, line);
+    opts.onEvent?.(line); // live viewers get exactly what is logged
+  };
   const rec: RunRecord = {
     runId, sessionId: null, meta: opts.meta, versionId: setup.version.id, callerLines: [], plans: [], turns: 0,
     endedBy: 'caller_end', error: null, score: { outcome: 'inconclusive', failures: [], firstFailureTurn: null, inconclusiveReason: 'not_run' },
