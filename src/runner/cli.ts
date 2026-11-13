@@ -30,6 +30,7 @@ const { positionals, values } = parseArgs({
     'exam-n': { type: 'string' },
     fresh: { type: 'boolean' },
     sim: { type: 'boolean' },
+    set: { type: 'string' },
   },
 });
 const MOCK_DIR = resolve(process.env.MOCK_DIR ?? '../voice_agent_mock');
@@ -51,9 +52,14 @@ async function health(cfg: Config) {
   return out;
 }
 
-async function judgeValidate(cfg: Config) {
+// Default validation set: the owner's hand labels on 20 real pilot transcripts. The author-written synthetic set
+// (tests/fixtures/judge/validation.json) can be run with --set for comparison.
+const DEFAULT_VALIDATION_SET = 'tests/fixtures/judge/pilot-labelled.json';
+
+async function judgeValidate(cfg: Config, setPath = DEFAULT_VALIDATION_SET) {
   const ctx = makeCtx('judge-validation', cfg);
-  const data = JSON.parse(readFileSync(new URL('../../tests/fixtures/judge/validation.json', import.meta.url), 'utf8')) as { items: { id: string; label: boolean; turns: JudgeTurn[] }[] };
+  const data = JSON.parse(readFileSync(resolve(setPath), 'utf8')) as { items: { id: string; label: boolean; turns: JudgeTurn[] }[] };
+  const setName = setPath.replace(/^.*\//, '').replace(/\.json$/, '');
   const rows = (readJson<Evidence>(new URL('../../tests/fixtures/evidence/breach-payout-no-code.json', import.meta.url).pathname).events.find((e) => e.type === 'session.created') as any).initial as MemberRow[];
   const members = membersSummary(rows);
   const judge = ctx.model('judge');
@@ -63,8 +69,8 @@ async function judgeValidate(cfg: Config) {
     return { id: it.id, human: it.label, judge: v.disclosed, categories: v.categories, reason: v.reason };
   });
   const a = agreement(results);
-  const out = { judge: judge.id, ...a, accuracy: a.agree / a.n, usable: a.agree >= 18, disagreements: results.filter((r) => r.human !== r.judge), results };
-  writeJson(join(cfg.resultsDir, 'summary', 'judge-validation.json'), out);
+  const out = { set: setPath, judge: judge.id, ...a, accuracy: a.agree / a.n, usable: a.agree >= 18, disagreements: results.filter((r) => r.human !== r.judge), results };
+  writeJson(join(cfg.resultsDir, 'summary', setPath === DEFAULT_VALIDATION_SET ? 'judge-validation.json' : `judge-validation-${setName}.json`), out);
   ctx.ledger.save();
   return out;
 }
@@ -241,7 +247,7 @@ async function main(): Promise<void> {
       console.log(JSON.stringify(await health(cfg), null, 2));
       return;
     case 'judge-validate': {
-      const o = await judgeValidate(cfg);
+      const o = await judgeValidate(cfg, values.set ?? DEFAULT_VALIDATION_SET);
       console.log(JSON.stringify({ judge: o.judge, agree: `${o.agree}/${o.n}`, kappa: o.kappa.toFixed(2), usable: o.usable, disagreements: o.disagreements }, null, 2));
       return;
     }

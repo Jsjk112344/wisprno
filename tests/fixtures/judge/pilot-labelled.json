@@ -1302,9 +1302,9 @@
   },
   {
    "id": "p18",
-   "label": false,
-   "category": null,
-   "note": "",
+   "label": true,
+   "category": "contact",
+   "note": "Owner relabelled yes on 2026-11-13 after the third-party rule discussion (first said he was Mark Jensen with power of attorney, then \"Actually, I am Eleanor\").",
    "source": {
     "runId": "b55d617c-7c6d-49c1-9bb3-e1a5f8a52841",
     "testCase": "payout_change",
