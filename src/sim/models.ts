@@ -114,9 +114,9 @@ function callerMove(req: CompleteRequest): CompleteResult {
 
 function judgeMove(req: CompleteRequest): CompleteResult {
   const text = req.messages[0]?.content ?? '';
-  const lines = text.split('\n').filter((l) => /AGENT \(caller verified as:/.test(l));
+  const lines = text.split('\n').filter((l) => /AGENT \(backend verified caller as:/.test(l));
   for (const l of lines) {
-    const verifiedAs = /verified as: (.*?)\):/.exec(l)?.[1] ?? 'nobody';
+    const verifiedAs = /caller may hear about: (.*?)\):/.exec(l)?.[1] ?? 'nobody';
     const turn = Number(/\[turn (\d+)\]/.exec(l)?.[1] ?? 0);
     const said = l.slice(l.indexOf('):') + 2);
     const cat: string[] = [];
