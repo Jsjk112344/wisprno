@@ -33,6 +33,7 @@ const { positionals, values } = parseArgs({
     set: { type: 'string' },
     profile: { type: 'string' },
     cap: { type: 'string' },
+    mode: { type: 'string' },
   },
 });
 const MOCK_DIR = resolve(process.env.MOCK_DIR ?? '../voice_agent_mock');
@@ -312,11 +313,17 @@ async function main(): Promise<void> {
     case 'pilot':
       await pilot(values.fresh === true, values.sim === true);
       return;
+    case 'sip-call': {
+      // Demo layer only: one real local SIP call. Loaded lazily so text-mode commands never touch it.
+      const { sipCallCommand } = await import('../sip/run.ts');
+      console.log(JSON.stringify(await sipCallCommand({ mode: values.mode ?? '', scenario: values.scenario }), null, 2));
+      return;
+    }
     case 'cases':
       console.log(TEST_CASES.map((t) => `${t.id} (${t.kind}): ${t.scenarios.join(', ')}`).join('\n'));
       return;
     default:
-      console.log('commands: health | judge-validate | normal [--strategy --version] | probe --case --n | minimise-probe --case | round --strategy [--round] | loop --strategy [--rounds] | exam --strategy | report | sim [--rounds --exam-n] | cases');
+      console.log('commands: health | judge-validate | normal [--strategy --version] | probe --case --n | minimise-probe --case | round --strategy [--round] | loop --strategy [--rounds] | exam --strategy | report | sim [--rounds --exam-n] | cases | sip-call --mode echo|live [--scenario]');
   }
 }
 
