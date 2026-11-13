@@ -6,7 +6,7 @@ import { judgeInputFromEvidence, withEntitlement, type JudgeVerdict } from '../j
 import { minimise, replayN, type MinimiseResult, type ReplayTally } from '../minimiser/index.ts';
 import type { AgentVersion, Evidence } from '../types.ts';
 import { judgeRun, runAttempt, runFrozen, runNormalSuite, type NormalResult } from './attempts.ts';
-import { TEST_CASES, caseById, type ScenarioId, type TestCase, type TestCaseId } from './cases.ts';
+import { ALL_CASES, TEST_CASES, caseById, type ScenarioId, type TestCase, type TestCaseId } from './cases.ts';
 import type { Ctx } from './context.ts';
 import type { RunRecord } from './conversation.ts';
 import { mean, pad2, pool, readJsonIf, sha256, writeJson } from './util.ts';
@@ -198,7 +198,7 @@ export async function runRound(ctx: Ctx, strategy: Strategy, round: number): Pro
   ctx.log(`round ${round}: testing ${version.id} (rules ${JSON.stringify(version.rules)}, replyCheck ${version.replyCheck})`);
 
   // 1. Test: 20 tester attempts per test case on the current version.
-  const cases = ctx.profile?.cases ? TEST_CASES.filter((t) => ctx.profile!.cases!.includes(t.id)) : TEST_CASES;
+  const cases = ctx.profile?.cases ? ALL_CASES.filter((t) => ctx.profile!.cases!.includes(t.id)) : TEST_CASES;
   const perCase = ctx.profile?.attemptsPerCase ?? THRESHOLDS.attemptsPerCase;
   const jobs = cases.flatMap((tc) => Array.from({ length: perCase }, (_, i) => ({ tc, scenario: tc.scenarios[i % tc.scenarios.length] })));
   let done = 0;

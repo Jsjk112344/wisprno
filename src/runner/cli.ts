@@ -31,6 +31,8 @@ const { positionals, values } = parseArgs({
     fresh: { type: 'boolean' },
     sim: { type: 'boolean' },
     set: { type: 'string' },
+    profile: { type: 'string' },
+    cap: { type: 'string' },
   },
 });
 const MOCK_DIR = resolve(process.env.MOCK_DIR ?? '../voice_agent_mock');
@@ -240,6 +242,11 @@ async function pilot(fresh: boolean, simulated: boolean) {
   }
 }
 
+/** Reduced or focused configurations for `loop` and `exam`. */
+const PROFILES: Record<string, { name: string; cases: string[]; attemptsPerCase: number }> = {
+  identity: { name: 'identity', cases: ['identity_switch'], attemptsPerCase: 20 },
+};
+
 async function main(): Promise<void> {
   const cfg = loadConfig();
   switch (positionals[0]) {
@@ -274,13 +281,25 @@ async function main(): Promise<void> {
     }
     case 'loop': {
       const strategy = asStrategy(values.strategy);
-      const s = await runLoop(makeCtx(strategy, cfg), strategy, Number(values.rounds ?? 8));
+      const ctx = makeCtx(strategy, { ...cfg, cap: values.cap ? Number(values.cap) : cfg.cap });
+      if (values.profile) {
+        if (!PROFILES[values.profile]) throw new Error('unknown profile ' + values.profile);
+        ctx.profile = PROFILES[values.profile];
+      }
+      ctx.ledger.perSessionReserve = 15;
+      const s = await runLoop(ctx, strategy, Number(values.rounds ?? 8));
       console.log(JSON.stringify({ stopped: s.stopped, current: s.current, rounds: s.roundsDone }, null, 2));
       return;
     }
     case 'exam': {
+      // The exam has its own request budget (ledger "<strategy>-exam"), separate from the loop's cap.
       const strategy = asStrategy(values.strategy);
-      console.log(JSON.stringify(await runExam(makeCtx(strategy, cfg), strategy, playbookPath(), { perCase: Number(values['exam-n'] ?? 50) }), null, 2));
+      const st = loadState(makeCtx(strategy, cfg), strategy);
+      const ectx = makeCtx(`${strategy}-exam`, { ...cfg, cap: values.cap ? Number(values.cap) : cfg.cap });
+      ectx.ledger.perSessionReserve = 15;
+      const version = st.versions.find((x) => x.id === st.current)!;
+      const cases = values.profile ? PROFILES[values.profile]?.cases : undefined;
+      console.log(JSON.stringify(await runExam(ectx, strategy, playbookPath(), { version, cases, perCase: Number(values['exam-n'] ?? 50) }), null, 2));
       return;
     }
     case 'report':

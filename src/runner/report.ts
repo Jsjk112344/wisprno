@@ -1,13 +1,14 @@
 // Builds report.md and chart.svg from the summary files. Recorded (scorer) and inferred (judge) results stay separate.
 import { existsSync, readdirSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { TEST_CASES } from './cases.ts';
+import { ALL_CASES } from './cases.ts';
 import type { ExamResult } from './exam.ts';
 import type { RoundSummary, State } from './experiment.ts';
 import { fmtCount, readJsonIf, wilson } from './util.ts';
 
 const STRATEGIES = ['prompt', 'checks'] as const;
-const TOOL_CASES = TEST_CASES.filter((t) => t.kind === 'tool').map((t) => t.id);
+// Test cases are whichever ones the run used (the six main ones, or a profile such as identity_switch).
+let TOOL_CASES: string[] = [];
 
 function rounds(dir: string, strategy: string): RoundSummary[] {
   const d = join(dir, 'summary', strategy);
@@ -54,6 +55,9 @@ export function buildReport(dir: string, opts: { simulated?: boolean } = {}): st
   const E = Object.fromEntries(STRATEGIES.map((s) => [s, readJsonIf<ExamResult>(join(sum, s, 'exam.json'))]));
   const judge = readJsonIf<any>(join(sum, 'judge-validation.json'));
   const maxX = Math.max(1, ...STRATEGIES.map((s) => R[s].length));
+  const used = new Set(STRATEGIES.flatMap((s) => R[s].flatMap((r) => Object.keys(r.perCase))));
+  TOOL_CASES = ALL_CASES.filter((t) => t.kind === 'tool' && used.has(t.id)).map((t) => t.id);
+  const hasDisclosure = used.has('spoken_disclosure');
 
   const colors = { prompt: '#2563eb', checks: '#dc2626' };
   const series = STRATEGIES.flatMap((s) => [
@@ -62,7 +66,7 @@ export function buildReport(dir: string, opts: { simulated?: boolean } = {}): st
   ]);
   writeFileSync(join(sum, 'chart.svg'), chartSvg(series, 'Recorded failure rate (tool test cases) and normal-call completion, by round', maxX));
   const dseries = STRATEGIES.map((s) => ({ name: `${s}: judged disclosure`, color: colors[s], points: R[s].map((r) => { const c = r.perCase.spoken_disclosure; const k = c?.judgedDisclosed ?? 0; const n = c?.n ?? 0; const [lo, hi] = wilson(k, n); return { x: r.round, y: n ? k / n : 0, lo, hi }; }) }));
-  writeFileSync(join(sum, 'chart-disclosure.svg'), chartSvg(dseries, 'Judged disclosure rate (inferred), spoken_disclosure test case, by round', maxX));
+  if (hasDisclosure) writeFileSync(join(sum, 'chart-disclosure.svg'), chartSvg(dseries, 'Judged disclosure rate (inferred), spoken_disclosure test case, by round', maxX));
 
   const out: string[] = [];
   out.push(`# Faultline experiment report${opts.simulated ? ' (LOCAL SIMULATION: not results)' : ''}`, '');
@@ -90,7 +94,7 @@ export function buildReport(dir: string, opts: { simulated?: boolean } = {}): st
     out.push('## Disclosure judge validation (inferred results depend on this)', '', `Judge \`${judge.judge}\` agreed with the hand labels on ${judge.agree}/${judge.n} transcripts (Cohen's kappa ${judge.kappa.toFixed(2)}; ${judge.truePos} true positive, ${judge.trueNeg} true negative, ${judge.falsePos} false positive, ${judge.falseNeg} false negative). Pre-registered bar: at least 18/20. ${judge.usable ? 'Met.' : '**Not met: treat judged disclosure numbers with caution.**'}`, '');
   }
 
-  out.push('## Results by round', '', '![failure and completion by round](chart.svg)', '', '![judged disclosure by round](chart-disclosure.svg)', '');
+  out.push('## Results by round', '', '![failure and completion by round](chart.svg)', '', ...(hasDisclosure ? ['![judged disclosure by round](chart-disclosure.svg)', ''] : []));
   for (const s of STRATEGIES) {
     if (!R[s].length) continue;
     out.push(`### ${s}`, '', `| Round | Version | ${TOOL_CASES.join(' | ')} | Disclosure (inferred) | Normal calls | Chosen failure | Fix |`, `|---|---|${TOOL_CASES.map(() => '---').join('|')}|---|---|---|---|`);
@@ -105,7 +109,7 @@ export function buildReport(dir: string, opts: { simulated?: boolean } = {}): st
   out.push('## Final exam', '');
   if (STRATEGIES.some((s) => E[s])) {
     out.push(`| Test case | ${STRATEGIES.filter((s) => E[s]).map((s) => `${s} (${E[s]!.version})`).join(' | ')} |`, `|---|${STRATEGIES.filter((s) => E[s]).map(() => '---').join('|')}|`);
-    for (const tc of TEST_CASES) {
+    for (const tc of ALL_CASES.filter((t) => STRATEGIES.some((s) => E[s]?.perCase[t.id]))) {
       out.push(`| ${tc.id}${tc.kind === 'disclosure' ? ' (judged, inferred)' : ' (recorded)'} | ${STRATEGIES.filter((s) => E[s]).map((s) => { const c = E[s]!.perCase[tc.id]; return tc.kind === 'disclosure' ? `${fmtCount(c.judgedDisclosed ?? 0, c.n)}; recorded ${c.recordedFailed}` : fmtCount(c.recordedFailed, c.n); }).join(' | ')} |`);
     }
     out.push('', `Exam tester: ${STRATEGIES.map((s) => E[s]?.tester).filter(Boolean)[0]} with 5 personas at temperature 1.`, '', '**Playbooks** (frozen scripts from voice_agent_mock/scenarios/playbooks.json, recorded):', '');

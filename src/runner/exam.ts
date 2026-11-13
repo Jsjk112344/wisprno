@@ -5,7 +5,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { AgentVersion } from '../types.ts';
 import { judgeRun, runAttempt, runFrozen } from './attempts.ts';
-import { TEST_CASES, type ScenarioId, type TestCaseId } from './cases.ts';
+import { ALL_CASES, TEST_CASES, type ScenarioId, type TestCaseId } from './cases.ts';
 import type { Ctx } from './context.ts';
 import { loadState, type Strategy } from './experiment.ts';
 import { mean, pool, writeJson } from './util.ts';
@@ -46,13 +46,14 @@ export interface ExamResult {
   signatures: Record<string, number>;
 }
 
-export async function runExam(ctx: Ctx, strategy: Strategy, playbookPath: string, opts: { version?: AgentVersion; perCase?: number; label?: string } = {}): Promise<ExamResult> {
-  const s = loadState(ctx, strategy);
-  const v = opts.version ?? s.versions.find((x) => x.id === s.current)!;
+export async function runExam(ctx: Ctx, strategy: Strategy, playbookPath: string, opts: { version?: AgentVersion; perCase?: number; label?: string; cases?: string[] } = {}): Promise<ExamResult> {
+  const s = opts.version ? null : loadState(ctx, strategy);
+  const v = opts.version ?? s!.versions.find((x) => x.id === s!.current)!;
+  const cases = opts.cases ? ALL_CASES.filter((t) => opts.cases!.includes(t.id)) : TEST_CASES;
   const n = opts.perCase ?? EXAM_PER_CASE;
   const label = opts.label ?? 'exam';
   ctx.log(`${label}: ${v.id} with ${ctx.cfg.models.exam}, ${n} per test case`);
-  const jobs = TEST_CASES.flatMap((tc) => Array.from({ length: n }, (_, i) => ({ tc, i, scenario: tc.scenarios[i % tc.scenarios.length], persona: EXAM_PERSONAS[i % EXAM_PERSONAS.length] })));
+  const jobs = cases.flatMap((tc) => Array.from({ length: n }, (_, i) => ({ tc, i, scenario: tc.scenarios[i % tc.scenarios.length], persona: EXAM_PERSONAS[i % EXAM_PERSONAS.length] })));
   const runs = await pool(jobs, ctx.cfg.concurrency, async (j) => {
     const rec = await runAttempt(ctx, v, j.tc, j.scenario, `${label}/${j.tc.id}`, { role: 'exam', persona: j.persona, temperature: 1, kind: 'exam' });
     const judged = j.tc.kind === 'disclosure' ? await judgeRun(ctx, rec) : null;
@@ -60,7 +61,7 @@ export async function runExam(ctx: Ctx, strategy: Strategy, playbookPath: string
   });
   const perCase: ExamResult['perCase'] = {};
   const signatures: Record<string, number> = {};
-  for (const tc of TEST_CASES) {
+  for (const tc of cases) {
     const rs = runs.filter((r) => r.j.tc.id === tc.id);
     perCase[tc.id] = {
       n: rs.length,
@@ -75,7 +76,7 @@ export async function runExam(ctx: Ctx, strategy: Strategy, playbookPath: string
     }
   }
   const playbooks: ExamResult['playbooks'] = [];
-  for (const pb of loadPlaybooks(playbookPath)) {
+  for (const pb of loadPlaybooks(playbookPath).filter((p) => cases.some((c) => c.id === p.testCase))) {
     const rs = await pool(Array.from({ length: PLAYBOOK_REPLAYS }, (_, i) => i), ctx.cfg.concurrency, () => runFrozen(ctx, v, pb.scenario, pb.turns, `${label}/playbook-${pb.id}`, { playbook: pb.id }));
     playbooks.push({ id: pb.id, testCase: pb.testCase, n: rs.length, failed: rs.filter((r) => r.score.outcome === 'fail').length, inconclusive: rs.filter((r) => r.score.outcome === 'inconclusive').length });
   }

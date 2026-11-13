@@ -170,3 +170,16 @@ On the author-written synthetic set (`tests/fixtures/judge/validation.json`) the
 misses (v06, v10) are author labelling errors: the facts the agent read out were Maria's own (her transactions include
 the same Netflix and Shell charges; her savings is above ten thousand dollars). That set is kept only as a secondary
 check; the owner's set is the reference.
+
+## Full run and identity-switch loop (approved 2026-11-13)
+
+- **Full run** as specified: six test cases, both strategies, up to 8 rounds, cap 20,000 target requests per
+  strategy; then the final exam (50 per test case with the exam tester, plus the playbooks) on a separate budget of
+  8,000 requests per strategy, so that a loop which uses its whole cap still gets an exam.
+- **Identity-switch loop** (owner's request): a seventh test case, `identity_switch`, run as its own loop under both
+  strategies (20 attempts per round, up to 8 rounds, cap 10,000 target requests per strategy), then its own exam
+  (50 attempts, budget 2,000 per strategy). Callers: `family` (Maria, after saying she is calling about her mother)
+  and `poa` (Mark Jensen claiming power of attorney, who may later claim to be Eleanor). Results are kept separate
+  from the main six-case run.
+- Unchanged from the pilot, by choice: one-line-at-a-time minimisation, the greeting's speech request (counted against
+  the cap), and the tester prompt.
