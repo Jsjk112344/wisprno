@@ -170,7 +170,7 @@ export async function startUiServer(o: UiServerOptions) {
       if (req.method === 'POST' && url.pathname === '/api/discovery/analyze') {
         const { approved } = await body(req);
         if (approved !== true) return json(res, 403, { error: 'Approve one Gemini mapping request before sending source code.' });
-        if (!process.env.GEMINI_API_KEY) return json(res, 400, { error: 'Set GEMINI_API_KEY in Faultline’s own environment and restart the server.' });
+        if (!process.env.GEMINI_API_KEY) return json(res, 400, { error: 'Set GEMINI_API_KEY in Wisprno’s own environment and restart the server.' });
         if (mappingBusy) return json(res, 409, { error: 'A mapping request is already in progress.' });
         mappingBusy = true;
         try {

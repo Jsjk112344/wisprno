@@ -1,4 +1,4 @@
-// Faultline loop UI: the split permission-map design, driven by recorded or live Story event logs.
+// Wisprno loop UI: the split permission-map design, driven by recorded or live Story event logs.
 // Playback only reads the story's events; every number on screen is a count of those events.
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -531,7 +531,7 @@ function App() {
     <div className={`app-shell split-loop ${details ? 'show-details' : 'focused'}`}>
       <header className="topbar flex items-center justify-between">
         <div className="brand">
-          <span className="brand-mark">ϟ</span>faultline<span className="brand-dot">.</span>
+          <span className="brand-mark">ϟ</span>wisprno<span className="brand-dot">.</span>
           <span className="divider" />
           <span className="workspace">{map.workspace}</span>
           <span className="demo-tag">{judge ? 'live · judge' : storyTag(story)}</span>

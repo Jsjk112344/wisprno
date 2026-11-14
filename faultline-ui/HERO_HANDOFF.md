@@ -1,6 +1,6 @@
 # Hero UI handoff
 
-The supplied design is now connected to the existing local Faultline target. See [README.md](README.md) for launch commands and [INTEGRATION.md](INTEGRATION.md) for endpoints.
+The supplied design is now connected to the existing local Wisprno target. See [README.md](README.md) for launch commands and [INTEGRATION.md](INTEGRATION.md) for endpoints.
 
 The runtime does not use the old payout rehearsal, fixed phase times, predetermined 20-trial counts, or local-only approval state. Agent presentation, selected attack, test case, discovery, proposal approval and regression saving all reach the server.
 

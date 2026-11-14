@@ -1,4 +1,4 @@
-// Faultline CLI. Usage: npm run faultline -- <command> [--flags]
+// Wisprno CLI. Usage: npm run faultline -- <command> [--flags]
 import { readFileSync, rmSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
@@ -310,7 +310,7 @@ async function main(): Promise<void> {
       const { buildStories } = await import('../../scripts/build-loop-stories.ts');
       const root = resolve('.');
       const ui = await startUiServer({ root, port: Number(values.port ?? 4320), sim: values.sim === true, page: join(root, 'faultline-ui/dist/index.html'), stories: () => buildStories() });
-      console.log(`Faultline loop UI: ${ui.url}${values.sim ? '  (simulated target and models, $0)' : ''}`);
+      console.log(`Wisprno loop UI: ${ui.url}${values.sim ? '  (simulated target and models, $0)' : ''}`);
       return;
     }
     case 'cases':

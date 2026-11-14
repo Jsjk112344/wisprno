@@ -1,4 +1,4 @@
-// Served-mode client: only talks to the local Faultline server that served this page (same origin).
+// Served-mode client: only talks to the local Wisprno server that served this page (same origin).
 // Opened as a file, every call here fails fast and the page stays in playback-only mode.
 import type { LiveMessage, ServerStatus, Story, UiEvent } from '../../src/loop/story.ts';
 

@@ -12,6 +12,6 @@ const server = createServer(async (req, res) => {
   } else if (req.url === '/') res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' }).end(html);
   else res.writeHead(404).end();
 });
-server.listen(4318, '127.0.0.1', () => console.log('Faultline archive chart: http://127.0.0.1:4318'));
+server.listen(4318, '127.0.0.1', () => console.log('Wisprno archive chart: http://127.0.0.1:4318'));
 process.once('SIGINT', () => server.close());
 process.once('SIGTERM', () => server.close());

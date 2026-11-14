@@ -2,7 +2,7 @@
 
 Run with the deployment's Python (which supplies the LiveKit network SDK).
 The target's code, configuration, tool instrumentation and artifacts live outside
-Faultline. This script only joins a local room, sends normal Playground text,
+Wisprno. This script only joins a local room, sends normal Playground text,
 and reads the deployment's ordered event log and observable artifacts.
 """
 from __future__ import annotations

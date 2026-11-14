@@ -14,7 +14,7 @@ function icon(name: string, size = 18) {
 // Static shell only. Recorded strings are always assigned through textContent.
 root.innerHTML = `<div class="app-shell replay-app">
   <header class="topbar flex items-center justify-between">
-    <div class="brand"><span class="brand-mark">ϟ</span>faultline<span class="brand-dot">.</span><span class="divider"></span><span class="workspace" id="target-name"></span><span class="demo-tag">synthetic deployment</span></div>
+    <div class="brand"><span class="brand-mark">ϟ</span>wisprno<span class="brand-dot">.</span><span class="divider"></span><span class="workspace" id="target-name"></span><span class="demo-tag">synthetic deployment</span></div>
     <button class="quiet" data-action="sources">${icon('file')}Source evidence</button>
   </header>
   <div class="body-layout">

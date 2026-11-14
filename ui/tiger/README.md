@@ -1,4 +1,4 @@
-# Faultline archive chart
+# Wisprno archive chart
 
 The main UI links to this panel through **Tiger Data outcomes** on setup and past runs. The panel reads `call_metrics_hourly` in Tiger Data. It never imports the engine, scorer, adapter, or model providers.
 
@@ -26,7 +26,7 @@ The continuous aggregate includes an hourly bucket because Timescale continuous 
 
 ## Judge explanation
 
-“Faultline records timestamped call events, so we can preserve what happened in order and compare outcomes as agent versions change. Tiger Data stores those events in a hypertable and rolls completed attempts into an hourly aggregate for this chart. The chart compares recorded breaches for prompt fixes and server checks as ‘x of n,’ keeps inconclusive calls visible, and labels model-judged disclosures separately as inferred.”
+“Wisprno records timestamped call events, so we can preserve what happened in order and compare outcomes as agent versions change. Tiger Data stores those events in a hypertable and rolls completed attempts into an hourly aggregate for this chart. The chart compares recorded breaches for prompt fixes and server checks as ‘x of n,’ keeps inconclusive calls visible, and labels model-judged disclosures separately as inferred.”
 
 ## Run library
 

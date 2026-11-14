@@ -1,6 +1,8 @@
-# Faultline
+# Wisprno
 
-Faultline is a test harness for voice agents. It plays simulated callers against an agent, reads the agent's backend
+Site: [wisprno.us](https://wisprno.us).
+
+Wisprno is a test harness for voice agents. It plays simulated callers against an agent, reads the agent's backend
 record of what actually happened (tool calls, verdicts, account state before and after), and decides from that
 record, not from what the agent says, whether the agent broke its own rules. When it finds a failure it shrinks it to
 the shortest call that still fails, asks a fixer agent for a fix, and checks that the fix holds without hurting
@@ -41,7 +43,7 @@ cp .env.example .env   # then fill in keys and the mock's admin token yourself
    read and version stamp). Configure its own `.env` (`ADMIN_TOKEN`, `ENABLE_PROVIDER=true`, `OPENAI_API_KEY`,
    `CHAT_MODEL`, and a `MAX_PROVIDER_REQUESTS` large enough for the run), then `npm start`.
 2. In this repo's `.env`, set `TARGET_URL` (default `http://127.0.0.1:4310`) and `TARGET_ADMIN_TOKEN` to the mock's
-   admin token. Faultline never reads the mock's `.env`.
+   admin token. Wisprno never reads the mock's `.env`.
 3. Check the connection: `npm run faultline -- health`.
 
 ## Dry run (no API spend)
@@ -93,7 +95,7 @@ See [faultline-ui/README.md](faultline-ui/README.md) for the connected workflow 
 
 ## Safety
 
-- Synthetic data only. The mock binds to 127.0.0.1 and rejects browser origins; Faultline calls it from this backend
+- Synthetic data only. The mock binds to 127.0.0.1 and rejects browser origins; Wisprno calls it from this backend
   process.
 - Secrets live only in `.env` (git-ignored). Tests and CI run without secrets or network access.
-- Every provider error marks the session inconclusive; Faultline never silently retries a paid turn.
+- Every provider error marks the session inconclusive; Wisprno never silently retries a paid turn.

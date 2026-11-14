@@ -1,8 +1,8 @@
 {
-  "name": "faultline",
+  "name": "wisprno",
   "version": "0.1.0",
   "private": true,
-  "description": "Faultline: a test harness that finds where voice agents break their own rules and measures which fixes work",
+  "description": "Wisprno: a test harness that finds where voice agents break their own rules and measures which fixes work",
   "type": "module",
   "engines": {
     "node": ">=24"

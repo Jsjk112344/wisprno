@@ -1,6 +1,6 @@
-# Faultline UI
+# Wisprno UI
 
-The local-target UI is integrated with the Faultline server. Start from the repository root with Node 24+:
+The local-target UI is integrated with the Wisprno server. Start from the repository root with Node 24+:
 
 ```sh
 npm ci
@@ -44,7 +44,7 @@ The Evidence desk exports/imports `faultline.story.v1`, retains original run/sou
 Setup now assigns an anonymous `Agent 01` profile and a conversation style before revealing the permission map.
 After choosing an attacker, the pairing animation leads into the event-driven investigation.
 
-On the profile screen, **Use Gemini to analyze tool relationships** is optional. It requires Faultline's existing
+On the profile screen, **Use Gemini to analyze tool relationships** is optional. It requires Wisprno's existing
 `GEMINI_API_KEY` and explicit consent in the checkbox. The server makes one `gemini-3.5-flash-lite` request per new
 source version (no retries), reads only `src/tools.mjs`, `src/rules.mjs`, `src/agent.mjs`, and `src/store.mjs` through
 the adapter, caps the combined source input at 40 KB and the response at 4,000 tokens, and caches valid results by

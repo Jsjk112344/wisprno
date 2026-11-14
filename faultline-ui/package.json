@@ -1,7 +1,8 @@
 {
-  "name": "faultline-arena",
+  "name": "wisprno-arena",
   "version": "1.0.0",
   "private": true,
+  "description": "Wisprno: inspect voice-agent permissions, replay attacks and verify fixes",
   "type": "module",
   "scripts": {
     "build": "node build.mjs",

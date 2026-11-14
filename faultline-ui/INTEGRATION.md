@@ -1,6 +1,6 @@
 # Backend integration
 
-The active interchange is Faultline's ordered `Story`/`UiEvent` contract in `src/loop/story.ts`. No separate browser scorer computes authorization from transcript wording.
+The active interchange is Wisprno's ordered `Story`/`UiEvent` contract in `src/loop/story.ts`. No separate browser scorer computes authorization from transcript wording.
 
 | UI operation | Backend |
 | --- | --- |

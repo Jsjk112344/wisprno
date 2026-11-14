@@ -1,4 +1,4 @@
-// The loop UI's input: one "story" per recorded or live run, translated from Faultline's ordered event logs.
+// The loop UI's input: one "story" per recorded or live run, translated from Wisprno's ordered event logs.
 // The UI never invents events: every UiEvent points back to a source event (file, line, original timestamp), and
 // the presentation clock (`at`, seconds) is pacing for playback, not measured call latency.
 

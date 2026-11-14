@@ -8,7 +8,7 @@ export const projectRoot = fileURLToPath(new URL('../../', import.meta.url));
 export function connection() {
   const env = new URL('../../.env', import.meta.url);
   if (existsSync(env)) loadEnvFile(env);
-  if (!process.env.TIGER_DATABASE_URL) throw new Error('Set TIGER_DATABASE_URL in Faultline’s .env');
+  if (!process.env.TIGER_DATABASE_URL) throw new Error('Set TIGER_DATABASE_URL in Wisprno’s .env');
   // Honor explicit libpq sslmode semantics (pg otherwise aliases require to verify-full).
   // verify-full/verify-ca and any sslrootcert supplied by the user remain unchanged.
   const url = new URL(process.env.TIGER_DATABASE_URL);
