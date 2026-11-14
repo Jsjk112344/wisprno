@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Faultline · Recorded outcomes</title>
+<style>
+:root{color-scheme:dark;font:16px/1.55 system-ui,sans-serif;background:#101614;color:#e8eee9}*{box-sizing:border-box}body{max-width:1120px;margin:0 auto;padding:40px 24px}header{border-bottom:1px solid #35443a;padding-bottom:28px}small,.muted{color:#afbbb3}h1{font-size:clamp(30px,5vw,48px);line-height:1.1;font-weight:600;margin:12px 0}h2{font-size:19px}label{display:inline-flex;flex-direction:column;gap:6px;margin:22px 24px 16px 0}select{font:inherit;background:#1e2922;color:inherit;padding:9px;border:1px solid #657a6c;border-radius:5px}.legend{display:flex;gap:24px}.prompt{color:#f7ba78}.checks{color:#8bd6b0}section{margin:24px 0;background:#17201b;border:1px solid #35443a;border-radius:10px;padding:24px}svg{width:100%;min-width:560px;height:auto}.scroll{overflow:auto}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}td,th{text-align:left;padding:10px 12px;border-bottom:1px solid #35443a}th{color:#afbbb3;font-weight:500}.error{color:#ffc8a2}p{max-width:85ch}#status{margin-top:20px}a{color:#8bd6b0}button{font:inherit;color:#e8eee9;background:#26392e;border:1px solid #657a6c;border-radius:6px;padding:8px 14px;cursor:pointer}button:disabled{opacity:.5}
+</style>
+<header><a href="/#history">← Past runs</a><br><small>FAULTLINE / EXPERIMENT ARCHIVE</small><h1>Did the next version hold?</h1><p>Compare prompt fixes and server checks against saved adversarial calls. Every point comes from the Tiger Data aggregate.</p></header>
+<label>Test case<select id="test"><option value="tools">All five tool-action cases</option></select></label>
+<label>Evidence<select id="evidence"><option value="recorded">Recorded · backend results</option><option value="inferred">Inferred · model-judged disclosure</option></select></label>
+<div class="legend"><span class="prompt">● Prompt strategy</span><span class="checks">● Checks strategy</span></div>
+<p id="status" role="status">Reading the archive…</p><button id="retry">Refresh from Tiger Data</button>
+<section><h2 id="title">Breach rate by agent version</h2><p class="muted" id="method"></p><div class="scroll" id="chart"></div><div class="scroll"><table><thead><tr><th>Strategy / version</th><th id="numerator">Breaches / attempts</th><th>95% interval</th><th>Held</th><th>Inconclusive</th><th>Untested</th><th>Not judged</th></tr></thead><tbody id="rows"></tbody></table></div></section>
+<section><h2>Normal callers still need to finish</h2><p class="muted">Saved completion results, counted once per normal call.</p><div id="normal"></div></section>
+<p class="muted">Experiment test calls only. Pilot calls, minimisation, fix replays, exams, and SIP transport checks are excluded from this comparison. Version numbers belong to each strategy; equal numbers do not identify equal agents. These adaptive experiments do not establish a causal head-to-head comparison.</p>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let data;
+function interval(k,n){if(!n)return null;const z=1.96,p=k/n,d=1+z*z/n,m=(p+z*z/(2*n))/d,h=z*Math.sqrt(p*(1-p)/n+z*z/(4*n*n))/d;return [Math.max(0,m-h),Math.min(1,m+h)];}
+function draw(){
+ if(!data)return;
+ const inferred=$('evidence').value==='inferred';
+ if(inferred)$('test').value='spoken_disclosure';
+ $('test').disabled=inferred;
+ const selected=data.metrics.filter(r=>$('test').value==='tools'?r.test_case!=='spoken_disclosure':r.test_case===$('test').value);
+ const groups=new Map();
+ for(const r of selected){const key=[r.strategy,r.agent_version,r.version_hash].join('/');if(!groups.has(key))groups.set(key,{...r,attempts:0,breaches:0,held:0,inconclusive:0,untested:0,judged_attempts:0,inferred_disclosures:0});const g=groups.get(key);for(const f of ['attempts','breaches','held','inconclusive','untested','judged_attempts','inferred_disclosures'])g[f]+=r[f];}
+ const points=[...groups.values()].sort((a,b)=>(parseInt((a.agent_version||'').slice(1))||0)-(parseInt((b.agent_version||'').slice(1))||0)||a.strategy.localeCompare(b.strategy));
+ $('title').textContent=inferred?'Disclosure rate by agent version · inferred':'Breach rate by agent version · recorded';
+ $('numerator').textContent=inferred?'Disclosures / judged calls':'Breaches / attempts';
+ $('method').textContent=inferred?'A model judged these transcripts. The denominator includes only cached judgments; missing judgments are not passes. Whiskers show descriptive 95% Wilson intervals.':'Breaches divided by all attempted test calls, including inconclusive attempts. Inconclusive never means held; read the counts below before interpreting a low rate. Whiskers show descriptive 95% Wilson intervals. Versions with no conclusive outcomes have no plotted rate.';
+ $('rows').innerHTML=points.map(p=>{const n=inferred?p.judged_attempts:p.attempts,k=inferred?p.inferred_disclosures:p.breaches,ci=!inferred&&p.breaches+p.held===0?null:interval(k,n);return `<tr><td class="${esc(p.strategy)}">${esc(p.strategy)} / ${esc(p.agent_version)} <small title="Exact version fingerprint">${esc(p.version_hash?p.version_hash.slice(0,8):'stamp unavailable')}</small></td><td>${k} of ${n}</td><td>${ci?ci.map(x=>(x*100).toFixed(1)+'%').join('–'):'Not measured'}</td><td>${inferred?'—':p.held}</td><td>${p.inconclusive} of ${p.attempts}</td><td>${p.untested}</td><td>${inferred?p.attempts-p.judged_attempts:'—'}</td></tr>`;}).join('');
+ const W=900,H=340,left=65,top=20,bottom=265,versionKey=p=>p.agent_version+'/'+(p.version_hash||'unknown'),versions=[...new Set(points.map(versionKey))];
+ let svg=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc($('title').textContent)}. Exact counts and intervals are in the table below.">`;
+ for(const tick of [0,.25,.5,.75,1]){const y=bottom-tick*(bottom-top);svg+=`<line x1="${left}" x2="870" y1="${y}" y2="${y}" stroke="#35443a"/><text x="50" y="${y+5}" text-anchor="end" fill="#afbbb3" font-size="13">${tick*100}%</text>`;}
+ const x=v=>left+100+versions.indexOf(v)*(650/Math.max(versions.length-1,1));
+ for(const v of versions)svg+=`<text x="${x(v)}" y="310" text-anchor="middle" fill="#e8eee9">${esc(v.split('/')[0])}${v.endsWith('/unknown')?' · stamp missing':''}</text>`;
+ for(const p of points){const n=inferred?p.judged_attempts:p.attempts,k=inferred?p.inferred_disclosures:p.breaches,ci=interval(k,n),cx=x(versionKey(p))+(p.strategy==='prompt'?-22:22),color=p.strategy==='prompt'?'#f7ba78':'#8bd6b0';if(!n||(!inferred&&p.breaches+p.held===0)){svg+=`<text x="${cx}" y="285" fill="${color}" text-anchor="middle" font-size="12">${n?(p.inconclusive?'inconclusive':'untested'):'n/a'}</text>`;continue;}const y=bottom-k/n*(bottom-top),lo=bottom-ci[0]*(bottom-top),hi=bottom-ci[1]*(bottom-top);svg+=`<g><title>${esc(p.strategy)} ${esc(p.agent_version)}: ${k} of ${n}; ${p.inconclusive} inconclusive</title><line x1="${cx}" x2="${cx}" y1="${hi}" y2="${lo}" stroke="${color}" stroke-width="2"/><circle cx="${cx}" cy="${y}" r="6" fill="${color}"/><text x="${cx}" y="${Math.max(15,y-14)}" text-anchor="middle" fill="${color}" font-size="12">${k} of ${n}</text></g>`;}
+ $('chart').innerHTML=points.length?svg+'</svg>':'<p>No archived test results match this selection.</p>';
+}
+async function load(){
+ $('retry').disabled=true;$('status').textContent='Reading Tiger Data…';$('status').className='';
+ try{const r=await fetch('/api/metrics');const d=await r.json();if(!r.ok)throw Error(d.error||'Tiger Data is unavailable.');data=d;
+ $('test').innerHTML='<option value="tools">All five tool-action cases</option>';
+ for(const c of [...new Set(d.metrics.map(r=>r.test_case).filter(Boolean))].sort())$('test').add(new Option(c.replaceAll('_',' '),c));
+ $('normal').innerHTML=d.normals.length?d.normals.map(n=>`<p><span class="${esc(n.strategy)}">${esc(n.strategy)} / ${esc(n.agent_version)} · ${esc(n.version_hash?.slice(0,8)||'stamp unavailable')}</span> · ${n.completions} of ${n.attempts} completed${n.unknown?`; ${n.unknown} unknown`:''}</p>`).join(''):'No normal-call results loaded.';
+ $('status').textContent='Connected to Tiger Data · saved results · no new model runs';draw();
+ }catch(e){data=null;$('chart').innerHTML='';$('rows').innerHTML='';$('normal').innerHTML='';$('status').className='error';$('status').textContent=e.message;}
+ finally{$('retry').disabled=false;}
+}
+$('retry').addEventListener('click',load);load();
+ $('test').addEventListener('change',draw);$('evidence').addEventListener('change',()=>{if($('evidence').value==='recorded')$('test').value='tools';draw();});
+</script>
+</html>

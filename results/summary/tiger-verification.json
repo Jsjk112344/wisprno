@@ -1,0 +1,40 @@
+{
+  "verifiedAt": "2026-11-14T16:17:17.645Z",
+  "service": "ezldmegc1s",
+  "source": {
+    "files": 3223,
+    "events": 64620,
+    "fixes": 24
+  },
+  "repeat": {
+    "inserted": {
+      "call_events": 0,
+      "fix_attempts": 0
+    },
+    "database": [
+      {
+        "name": "call_events",
+        "rows": 64620
+      },
+      {
+        "name": "fix_attempts",
+        "rows": 24
+      },
+      {
+        "name": "call_metrics_hourly",
+        "rows": 178
+      }
+    ]
+  },
+  "terminal": {
+    "source_runs": 3223,
+    "aggregate_runs": 3223
+  },
+  "timescale": {
+    "hypertable": true,
+    "continuous_aggregate": true
+  },
+  "chartGroups": 30,
+  "normalGroups": 4,
+  "mcpQueryVerified": true
+}

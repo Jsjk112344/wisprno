@@ -309,7 +309,7 @@ async function main(): Promise<void> {
       const { startUiServer } = await import('../loop/server.ts');
       const { buildStories } = await import('../../scripts/build-loop-stories.ts');
       const root = resolve('.');
-      const ui = await startUiServer({ root, port: Number(values.port ?? 4320), sim: values.sim === true, page: join(root, 'Faultline_Loop.html'), stories: () => buildStories() });
+      const ui = await startUiServer({ root, port: Number(values.port ?? 4320), sim: values.sim === true, page: join(root, 'faultline-ui/dist/index.html'), stories: () => buildStories() });
       console.log(`Faultline loop UI: ${ui.url}${values.sim ? '  (simulated target and models, $0)' : ''}`);
       return;
     }

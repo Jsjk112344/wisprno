@@ -68,7 +68,7 @@ const NODE_ICONS: Record<NodeId, Shape[]> = {
 
 export function NodeIcon({ node }: { node: NodeId }) {
   return (
-    <svg x={-73} y={-14} width={27} height={27} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.45}
+    <svg x={-78} y={-20} width={40} height={40} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.45}
       strokeLinecap="round" strokeLinejoin="round" className={`lucide refined-icon`}>
       {NODE_ICONS[node].map(([tag, attrs], i) => {
         const Tag = tag;

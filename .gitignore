@@ -19,3 +19,8 @@ results/summary/raw/
 
 # loop UI intermediate (rebuilt from results by scripts/build-loop-stories.ts)
 ui/loop/stories.json
+
+# generated hero UI bundles
+faultline-ui/compiled.css
+faultline-ui/compiled.js
+faultline-ui/dist/

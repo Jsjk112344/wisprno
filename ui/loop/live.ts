@@ -28,6 +28,8 @@ async function post<T>(path: string, body: unknown): Promise<T> {
 
 export const startLive = (mode: 'loop' | 'sip') => post<{ id: string }>('/api/live', { mode });
 
+export const decideFix = (id: string, candidate: string, approved: boolean) => post(`/api/live/${encodeURIComponent(id)}/decision`, { candidate, approved });
+
 /** Opens the live stream; returns a function that closes it. */
 export function streamLive(id: string, onMessage: (message: LiveMessage) => void, onBroken: (message: string) => void) {
   const source = new EventSource(`/api/live/${encodeURIComponent(id)}/stream`);

@@ -1,0 +1,70 @@
+import React, {useState, useEffect, useRef} from 'react';
+import {Github, ArrowRight, Shield, Database, Phone, Check, RotateCcw} from 'lucide-react';
+import {Avatar} from './avatar.jsx';
+import {api} from './api.js';
+export {Avatar};
+export const PERSONAS = [
+  {id:'morgan',name:'Morgan',role:'The Insider',tactic:'Authority',color:'#dfae87',quote:'I’m just correcting a branch error.'},
+  {id:'jules',name:'Jules',role:'The Grandchild',tactic:'Urgency',color:'#c6b4e8',quote:'She needs this sorted before closing.'},
+  {id:'avery',name:'Avery',role:'The Fixer',tactic:'Pretext',color:'#9ecabf',quote:'Nothing new. Just fixing the details.'},
+];
+function Discovery({discovery,count,target,onInspect,selected}) {
+  const tools=discovery.tools.filter(t=>t.testCase), height=Math.max(570,100+tools.length*116);
+  return <svg className="discovery" viewBox={`0 0 1100 ${height}`} role="group" aria-label="Discovered local tools and the records they can change">
+    <defs><marker id="scan-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L8 4L0 8" fill="#8095a9"/></marker></defs>
+    <rect x="250" y="25" width="825" height={height-50} rx="24" fill="#19222c" stroke="#30404e"/><text x="277" y="55" className="zone">{discovery.workspace.toUpperCase()}</text>
+    <g transform="translate(30 235)"><rect width="180" height="100" rx="18" fill="#292d35" stroke="#697684"/><Github x="20" y="17" width="28"/><text x="20" y="67" className="discovery-label">{discovery.repository}</text></g>
+    <path className="discovery-edge" d="M210 285H300" markerEnd="url(#scan-arrow)"/>
+    <g transform="translate(300 235)"><rect width="170" height="100" rx="18" fill="#30465c" stroke="#8babc3"/><foreignObject x="12" y="14" width="54" height="54"><Avatar size={54}/></foreignObject><text x="80" y="40" className="discovery-label">{target||'Pioneer'}</text><text x="80" y="61" className="node-sub">Voice agent</text></g>
+    {tools.map((tool,i)=>{const y=80+i*116;return <g key={tool.name} className={'discovered '+(count>i?'revealed':'')}>
+      <path d={`M470 285C520 285 510 ${y+35} 560 ${y+35}`} className="discovery-edge" markerEnd="url(#scan-arrow)"/><path d={`M790 ${y+35}H865`} className="discovery-edge" markerEnd="url(#scan-arrow)"/>
+      <g role="button" tabIndex={count>i?0:-1} aria-label={tool.name} onClick={()=>onInspect(tool)} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onInspect(tool);}}}>
+        <rect x="560" y={y} width="230" height="70" rx="13" fill={selected?.name===tool.name?'#3a4854':'#253340'} stroke={selected?.name===tool.name?'#e0b495':'#4a6072'}/><Shield x="576" y={y+10} width="26" height="26" color="#c5d6e5"/><text x="576" y={y+55} className="tool-label">{tool.name}</text>
+      </g><g><rect x="865" y={y} width="180" height="70" rx="13" fill="#232b32" stroke="#46515c"/><Database x="880" y={y+10} width="26" color="#c9b499"/><text x="880" y={y+55} className="discovery-label">{tool.resource}</text></g>
+    </g>;})}
+  </svg>;
+}
+const STYLES=['Warm & helpful','Calm & precise','Brief & direct'];
+export default function Setup({onStart,onRecording,onResume,resumeId,busy,error,status}) {
+  const [phase,setPhase]=useState('connect'),[discovery,setDiscovery]=useState(null),[count,setCount]=useState(0);
+  const [target,setTarget]=useState('Agent 01'),[style,setStyle]=useState(()=>STYLES[Math.floor(Math.random()*STYLES.length)]),[attacker,setAttacker]=useState(PERSONAS[0]);
+  const [inspect,setInspect]=useState(null),[caseId,setCase]=useState('payout_change'),[failure,setFailure]=useState(''),[loading,setLoading]=useState(false),[spend,setSpend]=useState(false);
+  const [recordings,setRecordings]=useState(null),[useGemini,setUseGemini]=useState(false),[analysis,setAnalysis]=useState(null),[launchStep,setLaunchStep]=useState(0);
+  const startRef=useRef(onStart);startRef.current=onStart;
+  const tools=discovery?.tools.filter(t=>t.testCase)??[];
+  const mappedDiscovery=analysis?{...discovery,tools:discovery.tools.map(tool=>({...tool,resource:analysis.paths.find(path=>path.tool===tool.name)?.resource??tool.resource}))}:discovery;
+  async function connect(){setLoading(true);setFailure('');try{const data=await api('/api/discovery');setDiscovery(data);setCount(0);setPhase('target');}catch(e){setFailure(e.message);}finally{setLoading(false);}}
+  async function mapPermissions(){
+    setFailure('');setLoading(true);setAnalysis(null);
+    try{if(useGemini){setPhase('analyzing');setAnalysis(await api('/api/discovery/analyze',{approved:true}));}setCount(0);setPhase('mapping');}
+    catch(e){setFailure(e.message);setPhase('target');}finally{setLoading(false);}
+  }
+  useEffect(()=>{if(phase!=='mapping')return;if(count>=tools.length){setPhase('mapped');return;}const timer=setTimeout(()=>setCount(v=>v+1),600);return()=>clearTimeout(timer);},[phase,count,tools.length]);
+  useEffect(()=>{
+    if(phase!=='launching')return;
+    if(launchStep<2){const timer=setTimeout(()=>setLaunchStep(v=>v+1),700);return()=>clearTimeout(timer);}
+    const timer=setTimeout(()=>{void startRef.current({target:target.trim(),style,attacker:attacker.id,caseId},spend).then(ok=>{if(ok===false)setPhase('select');});},500);
+    return()=>clearTimeout(timer);
+  },[phase,launchStep,target,style,attacker.id,caseId,spend]);
+  async function recordingsList(){setLoading(true);try{setRecordings(await api('/api/stories'));}catch(e){setFailure(e.message);}finally{setLoading(false);}}
+  const profile=<section className="target-persona"><Avatar size={106}/><span className="eyebrow">ANONYMOUS TARGET PROFILE</span><label>Agent name<input maxLength={32} value={target} onChange={e=>setTarget(e.target.value)}/></label><label>Conversation style<select value={style} onChange={e=>setStyle(e.target.value)}>{STYLES.map(s=><option key={s}>{s}</option>)}</select></label><p className="panel-note">A synthetic identity and personality are assigned first. Rename the agent or adjust its style before mapping its privileges.</p>
+    <label className="spend-confirm"><input type="checkbox" checked={useGemini} disabled={!discovery?.mapper?.available} onChange={e=>setUseGemini(e.target.checked)}/>Use Gemini to analyze tool relationships</label>
+    <p className="mapping-consent">{discovery?.mapper?.available?<>Enabling this authorizes one Gemini request when you choose Map agent privileges. Sends only tools.mjs, rules.mjs, agent.mjs and store.mjs (up to 40 KB); output capped at 4,000 tokens, no retries. Source-matched results are reused.</>:'Gemini mapping requires GEMINI_API_KEY in Faultline’s environment. Local catalogue mapping works without API spend.'}</p>
+    <button className="primary" disabled={!target.trim()||loading} onClick={mapPermissions}>Map agent privileges <ArrowRight size={17}/></button>
+  </section>;
+  return <div className="setup-shell"><header><div className="logo">faultline<span>.</span></div><span className="mode">{status?.sim?'simulated calls · local source':status?'local target':'connecting to server'}</span>{discovery&&<span className="repo-label"><Github size={14}/>{discovery.repository}</span>}</header>
+    {(error||failure)&&<div className="error global-error" role="alert">{error||failure}</div>}
+    {phase==='connect'?<main className="connect-stage"><div><span className="eyebrow">MEET YOUR AGENT’S ADVERSARY</span><h1>Every voice has<br/>a weak spot.</h1><p className="setup-tagline">The scammer your voice agent hasn’t met yet.</p><button className="repo-connect" disabled={loading||busy} onClick={connect}><Github size={24}/><span>{loading?'Connecting…':'Connect local repository'}<small>voice_agent_mock</small></span><ArrowRight size={22}/></button><span className="connection-note">Read the local tool catalogue, then choose the personality behind the permissions.</span>
+      <div className="setup-links"><button onClick={recordingsList} disabled={loading}>Recorded calls</button>{resumeId&&<button onClick={onResume} disabled={busy}>Resume last run</button>}</div>{recordings&&<section className="recording-list" aria-label="Recorded calls">{recordings.length?recordings.map(story=><button key={story.id} onClick={()=>onRecording(story)}>{story.title}<small>{story.transport} · {story.tier}</small><ArrowRight size={16}/></button>):<p>No recorded runs found. Connect the target to run a new test.</p>}</section>}
+    </div><div className="cast-preview">{PERSONAS.map((p,i)=><div key={p.id} className={'cast cast-'+i}><Avatar id={p.id} color={p.color} size={160}/><b>{p.name}</b><span>{p.role}</span></div>)}</div></main>:
+    phase==='target'?<main className="profile-stage"><div><span className="eyebrow">FIRST, THE AGENT</span><h1>A personality before<br/>the permissions.</h1><p>Start with an anonymous target. Its tools come from your repository; its conversational style becomes part of the version we test.</p><div className="profile-facts"><span>{discovery.tools.length} tools discovered</span><span>Owned local deployment</span><span>Synthetic member records</span></div></div>{profile}</main>:
+    phase==='analyzing'?<main className="launch-stage" role="status"><div className="analysis-orbit"><Shield size={72}/></div><span className="eyebrow">GEMINI SOURCE ANALYSIS</span><h1>Tracing tools to records and checks.</h1><p>Reading four source files. Every returned relationship must cite a matching source line before it appears on the map.</p></main>:
+    phase==='launching'?<main className="launch-stage" role="status"><span className="eyebrow">{['THE ADVERSARY','THE TARGET','THE INVESTIGATION'][launchStep]}</span><div className={`launch-pair step-${launchStep}`}><div className="launch-caller"><Avatar id={attacker.id} color={attacker.color} size={144}/><h2>{attacker.name}</h2><p>{attacker.tactic}</p></div><div className="launch-connection"><span/><ArrowRight size={28}/></div><div className="launch-target"><Avatar size={144}/><h2>{target}</h2><p>{style}</p></div></div><h1>{['A new caller. A different motive.','One request. A permission boundary.','Opening the investigation…'][launchStep]}</h1><p>{tools.find(t=>t.testCase===caseId)?.resource} · {status?.sim?'Simulated text call':'Live text call'} · The graph will follow observed events.</p></main>:
+    <main className="setup-main"><div className="setup-title"><div><span className="eyebrow">{phase==='select'?'CHOOSE YOUR CALLER':'AGENT PRIVILEGES'}</span><h1>{phase==='mapping'?'Mapping tools, records and checks…':phase==='mapped'?'What your agent can access and change.':'Who tests this permission?'}</h1><p className="mapping-description">{phase==='select'?`${target} · ${style}`:'Follow each tool to the record it touches and inspect the checks available to guard it.'}</p></div>{phase==='mapping'?<span className="mapping-count">{count} / {tools.length} actions</span>:phase==='mapped'?<button className="primary" onClick={()=>setPhase('select')}>Choose an attacker <ArrowRight size={17}/></button>:<button className="back-link" onClick={()=>setPhase('mapped')}>View privileges</button>}</div>
+      {phase==='select'?<div className="attacker-stage"><section className="chosen-target"><Avatar size={120}/><span className="eyebrow">YOUR TARGET</span><h2>{target}</h2><p>{style}</p><label>Permission to test<select value={caseId} onChange={e=>setCase(e.target.value)}>{tools.map(tool=><option key={tool.name} value={tool.testCase}>{tool.resource}</option>)}</select></label><button className="back-link" onClick={()=>setPhase('target')}>Edit target profile</button></section><section className="persona-picker">{PERSONAS.map(p=><button key={p.id} className={'persona-choice '+(p.id===attacker.id?'selected':'')} onClick={()=>setAttacker(p)} aria-pressed={p.id===attacker.id}><Avatar id={p.id} color={p.color} size={74}/><span><b>{p.name}<small>{p.tactic}</small></b><em>{p.role}</em><q>{p.quote}</q></span>{p.id===attacker.id&&<Check className="selected-check" size={16}/>}</button>)}<p className="panel-note">{status?.sim?'Simulated callers use the real mock tools. No telephone call or model spend.':'Text-mode attack using configured model APIs, not a SIP call.'}</p>{!status?.sim&&<label className="spend-confirm"><input type="checkbox" checked={spend} onChange={e=>setSpend(e.target.checked)}/>Allow model calls within the existing request cap</label>}<button className="primary launch-call" disabled={busy||(!status?.sim&&!spend)} onClick={()=>{setLaunchStep(0);setPhase('launching');}}><Phone size={17}/>Test as {attacker.name}<ArrowRight size={17}/></button></section></div>:
+      <div className="discovery-wrap"><Discovery discovery={mappedDiscovery} count={count} target={target} onInspect={setInspect} selected={inspect}/>{inspect&&<div className="tool-inspector"><div><code>{inspect.name}</code><p>{inspect.description}</p><small>{inspect.enforcement}</small><p>Available server checks: {inspect.checks.join(', ')||'None'}</p>{analysis?.paths.filter(p=>p.tool===inspect.name).map(p=><div key={p.tool}><b>Gemini interpretation · inferred</b><p>{p.explanation}</p>{p.evidence.map((ref,i)=><pre key={i}>{ref.file}:{ref.line}{'\n'}{ref.quote}</pre>)}</div>)}</div><button aria-label="Close tool detail" onClick={()=>setInspect(null)}>×</button></div>}
+      {phase==='mapped'&&<><div className="map-bottom"><span><Shield size={16}/>{tools.length} testable actions · {discovery.tools.length} tools · {analysis?'Gemini interpretation, source-cited':'Local catalogue relationships'}</span><button onClick={()=>{setCount(0);setPhase('mapping');}}><RotateCcw size={14}/>Replay mapping</button><button onClick={()=>setPhase('target')}>Edit target</button></div><details className="catalogue"><summary>All tools and source version</summary><code>tools {discovery.sourceHashes.tools}</code>{analysis&&<p>{analysis.model} · {analysis.label} · {analysis.cached?'Reused source-matched analysis':'Analyzed this source version'}</p>}{discovery.tools.map(tool=><button key={tool.name} onClick={()=>setInspect(tool)}>{tool.name}<small>{tool.group} · {tool.writes?'writes':'no record write'}</small></button>)}</details></>}
+      </div>}
+    </main>}
+  </div>;
+}

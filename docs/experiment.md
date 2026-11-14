@@ -220,3 +220,17 @@ adaptive. Outright impersonation from the first word becomes a separate scenario
 scenarios also ask the tester for turns of one or two short sentences (latency; the deployment hangs up at 180 s),
 and the caller transcribes the agent's speech in pieces at its pauses instead of after it stops. Neither changes the
 scoring rule.
+
+## Local UI integration (2026-11-14)
+
+The connected hero UI uses the existing demo-sized live loop, separate from experiment statistics. It preserves
+the minimizer thresholds and uses at most four attempts, ten attack replays, six normal calls and two proposed
+checks. Every candidate now waits for explicit approval before any candidate session is created. Normal-call
+selection prioritizes the action being tested (card lock for lost-card tests; payout for payment-link tests), then
+fills from the existing normal suite. Incomplete normal evidence or normal-call rule failures reject a candidate.
+These are UI/demo acceptance rules, not a revision to the experiment thresholds above.
+
+Target name/style enter the baseline prompt; attacker persona enters the tester prompt. Events retain prompt
+hashes, candidate versions, source run IDs and recorded tool effects. Local simulation integration checks are
+software verification only and do not establish robustness of a real model. No new real-model experiment or SIP
+measurement was performed for this integration.

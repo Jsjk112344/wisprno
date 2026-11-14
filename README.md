@@ -47,8 +47,8 @@ cp .env.example .env   # then fill in keys and the mock's admin token yourself
 ## Dry run (no API spend)
 
 ```sh
-npm run faultline -- sim                # full workflow locally, ~7 minutes
-npm run faultline -- sim --rounds 1 --exam-n 5   # quick smoke run, ~15 seconds
+npm run faultline -- sim                # full workflow locally
+npm run faultline -- sim --rounds 1 --exam-n 5   # smoke run
 ```
 
 Starts the real mock server in-process on 127.0.0.1 (temporary database, `MOCK_DIR` defaults to
@@ -72,23 +72,24 @@ npm run faultline -- report
 See [docs/experiment.md](docs/experiment.md) for the question, method, thresholds (fixed before any results) and
 assumptions.
 
-## Loop UI (playback and live)
-
-`Faultline_Loop.html` replays recorded runs as the attack → shrink → replay → fix loop on the permission map. It is
-built from saved results only (`src/loop/from-experiment.ts`, `src/loop/from-sip.ts`): the checks-strategy round whose
-server-side fix was accepted, and every live SIP call with its mixed call recording.
+## UI (local target and recorded calls)
 
 ```bash
-node scripts/build-loop-stories.ts      # results → ui/loop/stories.json (git-ignored)
-npm run ui:loop                         # → Faultline_Loop.html (open directly: playback only)
-npm run faultline -- ui --sim           # http://127.0.0.1:4320/ : playback + live loop + judge mode, simulated ($0)
-npm run faultline -- ui                 # same against the running mock (TARGET_URL); live loops spend model calls
+npm run ui:install                     # install the supplied frontend dependencies
+npm run ui:start                       # build + start simulation at http://127.0.0.1:4321/ ($0)
 ```
 
-Served mode adds **Run loop** (a demo-sized live loop on the mock: up to 4 attempts, 10 replays, 6 normal calls,
-2 fix proposals; streamed as it runs), **Place SIP call** (the gated `sip-call --mode live`; needs the AIReceptionist
-worker running and a remaining authorization) and **Judge mode** (your turns go to a real session on the mock; every
-reply, tool call and record shown comes from its evidence). The server listens on 127.0.0.1 only.
+Connect the local repository, inspect discovered tools, configure the target and caller, and run an attack. The UI
+streams real backend evidence, pauses at breaches, asks for approval before testing a candidate check, and displays
+measured replay and normal-call results. Save minimized regressions under `results/ui/tests/`.
+
+The adapter locates `voice_agent_mock` in a sibling or parent directory; set `MOCK_DIR` to override. It never reads
+that checkout's environment files. For a running target using real models, build with `npm run ui:build`, then run
+`npm run faultline -- ui --port 4321`. The frontend requires model-spend authorization before starting a run.
+
+**Recorded calls** opens existing text and SIP evidence. The new UI does not initiate SIP calls. The legacy loop
+remains available at `/legacy` after `npm run ui:loop`, including its existing gated SIP controls.
+See [faultline-ui/README.md](faultline-ui/README.md) for the connected workflow and evidence boundaries.
 
 ## Safety
 

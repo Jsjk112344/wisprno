@@ -11,16 +11,22 @@
     "test": "node --test \"tests/**/*.test.ts\"",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.loop.json",
     "lint": "eslint .",
-    "check": "npm run typecheck && npm run lint && npm test",
+    "check": "npm run typecheck && npm run lint && npm test && npm --prefix faultline-ui test",
     "faultline": "node --env-file-if-exists=.env src/runner/cli.ts",
-    "ui:build": "node scripts/build-replay-ui.ts",
+    "ui:build": "npm --prefix faultline-ui run build",
     "ui:check": "tsc --noEmit -p tsconfig.ui.json",
-    "ui:loop": "node scripts/build-loop-ui.ts"
+    "ui:loop": "node scripts/build-loop-ui.ts",
+    "tiger:load": "node scripts/load-tiger.ts",
+    "tiger:chart": "node scripts/serve-tiger.ts",
+    "ui:replay": "node scripts/build-replay-ui.ts",
+    "ui:install": "npm --prefix faultline-ui ci",
+    "ui:start": "npm run ui:build && npm run faultline -- ui --sim --port 4321"
   },
   "license": "MIT",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^24.19.2",
+    "@types/pg": "^8.23.1",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "esbuild": "^0.28.2",
@@ -29,5 +35,8 @@
     "react-dom": "^18.3.1",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.72.2"
+  },
+  "dependencies": {
+    "pg": "^8.23.1"
   }
 }

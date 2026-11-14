@@ -1,10 +1,10 @@
 // Faultline loop UI: the split permission-map design, driven by recorded or live Story event logs.
 // Playback only reads the story's events; every number on screen is a count of those events.
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { NodeId, ServerStatus, Story, UiEvent, Verdict } from '../../src/loop/story.ts';
 import { EDGES, Icon, NODES, NodeIcon } from './geometry.tsx';
-import { judgeStart, judgeTurn, startLive, streamLive, fetchStatus } from './live.ts';
+import { judgeStart, judgeTurn, startLive, streamLive, fetchStatus, decideFix } from './live.ts';
 import {
   TIER_LABEL, aggregate, chipCount, pace, count, mmss, reduce, sortEvents, storyTag, suiteTotals,
   type RecordEv, type SayEv, type Ev,
@@ -74,6 +74,7 @@ function App() {
     return byId >= 0 ? byId : Math.min(recorded.length - 1, Math.max(0, Number(wanted) || 0));
   });
   const [mode, setMode] = useState<'recorded' | 'live' | 'judge'>('recorded');
+  const [liveRunId, setLiveRunId] = useState<string | null>(null);
   const [liveStory, setLiveStory] = useState<Story | null>(null);
   const [judgeStory, setJudgeStory] = useState<Story | null>(null);
   const [judgeId, setJudgeId] = useState<string | null>(null);
@@ -92,6 +93,13 @@ function App() {
   const [listening, setListening] = useState(false);
   const [status, setStatus] = useState<ServerStatus | null>(null);
   const [menu, setMenu] = useState(false);
+  const [details, setDetails] = useState(false);
+  const [mapping, setMapping] = useState<number | null>(null);
+  useEffect(() => {
+    if (mapping === null || mapping < 0 || mapping >= 4) return;
+    const timer = window.setTimeout(() => setMapping(mapping + 1), 1100);
+    return () => window.clearTimeout(timer);
+  }, [mapping]);
   const [liveRunning, setLiveRunning] = useState(false);
   const [following, setFollowing] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -100,7 +108,6 @@ function App() {
   });
   const soundRef = useRef(false);
   const lastT = useRef(Math.max(0, Number(hash.get('t')) || 0));
-  const freezeUntil = useRef(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioStop = useRef<number | undefined>(undefined);
   const closeStream = useRef<(() => void) | null>(null);
@@ -134,7 +141,7 @@ function App() {
   useEffect(() => () => closeStream.current?.(), []);
   useEffect(() => { if (!playing) stopAudio(); }, [playing, stopAudio]);
 
-  // Playback clock (recorded stories). Holds half a second on the first breach, as the design does.
+  // Pause presentation at each breached record. Live evidence collection continues in the background.
   useEffect(() => {
     if (growing ? !following : !playing) return;
     let previous = performance.now();
@@ -142,17 +149,20 @@ function App() {
       const now = performance.now();
       const step = (now - previous) / 1000 * speed;
       previous = now;
-      if (now < freezeUntil.current) return;
       setT((current) => {
-        if (growing) return Math.min(queueEnd, Math.max(current, Math.min(queueEnd, current + step)));
-        const next = Math.min(duration, current + step);
-        if (firstBreachAt !== null && current < firstBreachAt && next >= firstBreachAt) freezeUntil.current = now + 500;
+        const next = Math.min(growing ? queueEnd : duration, current + step);
+        const breach = events.find((e) => e.type === 'record' && e.verdict === 'breached' && e.at > current && e.at <= next);
+        if (breach) {
+          setPlaying(false); setFollowing(false);
+          return breach.at;
+        }
+        if (growing) return Math.max(current, next);
         if (next >= duration) setPlaying(false);
         return next;
       });
     }, 50);
     return () => window.clearInterval(timer);
-  }, [playing, speed, growing, following, duration, queueEnd, firstBreachAt]);
+  }, [playing, speed, growing, following, duration, queueEnd, events]);
 
   // One audio element per source (a SIP story's source is the whole mixed call). During playback it is kept in
   // sync with the playhead (seeked when a line starts and it has drifted); for the shortest-call playlist each clip
@@ -245,7 +255,7 @@ function App() {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') { setDrawer(null); setNode(null); setMenu(false); }
+      if (event.key === 'Escape') { setDrawer(null); setNode(null); setMenu(false); setMapping(null); }
       const tag = (document.activeElement as HTMLElement | null)?.tagName ?? '';
       if (event.code === 'Space' && !['INPUT', 'TEXTAREA', 'BUTTON', 'SELECT'].includes(tag)) {
         event.preventDefault();
@@ -259,7 +269,7 @@ function App() {
   const loadStory = (index: number) => {
     if (playing) { toast('Pause before changing caller'); return; }
     closeStream.current?.(); closeStream.current = null;
-    setLiveRunning(false); setMode('recorded'); setSelected(index); setDrawer(null); setNode(null);
+    setMapping(null); setLiveRunning(false); setMode('recorded'); setSelected(index); setDrawer(null); setNode(null);
     stopAudio(); lastT.current = 0; setT(0);
   };
 
@@ -277,6 +287,7 @@ function App() {
       closeStream.current?.();
       setPlaying(false); stopAudio();
       const { id } = await startLive(liveMode);
+      setLiveRunId(id);
       setLiveStory(null); setLiveRunning(true); setFollowing(true); lastT.current = 0; setT(0);
       closeStream.current = streamLive(id, (message) => {
         if (message.kind === 'story') {
@@ -378,6 +389,15 @@ function App() {
 
   // ---- Derived presentation ------------------------------------------------------------------------------------
   const map = story.map;
+  const proposed = rawStory.events.findLast((e) => e.type === 'proposal');
+  const pendingFix = proposed?.type === 'proposal' && !rawStory.events.some((e) => e.type === 'decision' && e.candidate === proposed.candidate) ? proposed : null;
+  const reviewFix = async (approved: boolean) => {
+    if (!liveRunId || !pendingFix) return;
+    setBusy(true);
+    try { await decideFix(liveRunId, pendingFix.candidate, approved); setFollowing(true); }
+    catch (e) { toast((e as Error).message); }
+    finally { setBusy(false); }
+  };
   const judge = mode === 'judge';
   const shrinking = view.phase === 'Shrink';
   const lastFinding = view.findings.at(-1);
@@ -424,6 +444,9 @@ function App() {
   };
 
   function renderNode(id: NodeId) {
+    if (!details && (id === 'details' || id === 'tactic')) return null;
+    const revealAt: Record<NodeId, number> = { details: 0, tactic: 0, caller: 0, agent: 1, payout: 2, other: 2, identity: 3, approval: 3, record: 4 };
+    if (mapping !== null && mapping < revealAt[id]) return null;
     const [x, y] = NODES[id];
     const info = labels[id];
     const danger = id === 'record' && !!lastFinding && lastFinding.verdict === 'breached' && view.status[lastFinding.tool] === 'breached';
@@ -435,9 +458,10 @@ function App() {
         transform={`translate(${x} ${y})`} role="button" tabIndex={0} aria-label={`${info.label}, ${info.sub}`}
         onClick={() => openNode(id)} onKeyDown={(event) => { if (event.key === 'Enter') openNode(id); }}>
         <rect className="node-face" x="-90" y="-38" width="180" height="76" rx="11" />
+        <title>{info.role}: {info.label}. {info.sub}</title>
         <NodeIcon node={id} />
-        <text className="node-title" x="-35" y="-5">{info.label.length > 16 ? info.label.slice(0, 15) + '…' : info.label}</text>
-        <text className={`node-sub ${id === 'tactic' ? 'inferred' : ''}`} x="-35" y="16">{sub}</text>
+        <text className="node-title" x="-29" y="-5">{info.label.length > 16 ? info.label.slice(0, 15) + '…' : info.label}</text>
+        <text className={`node-sub ${id === 'tactic' ? 'inferred' : ''}`} x="-29" y="16">{sub}</text>
         {((id === 'caller' && speaking && view.speaker === 'red') || (id === 'agent' && speaking && view.speaker === 'agent')) &&
           <rect className="speaking-frame" x="-95" y="-43" width="190" height="86" rx="14" />}
         {id === 'approval' && view.fixed && (
@@ -474,6 +498,20 @@ function App() {
   const findingThreat = finding ? story.threats.find((threat) => threat.tool === finding.tool) : undefined;
   const ref = finding?.ref;
 
+  const breachPaused = !!lastFinding && lastFinding.verdict === 'breached' && t === lastFinding.at;
+  const stage = breachPaused ? 'Breach' : view.pivoted ? 'Next route' : view.fixed ? 'Retest' : view.fix ? 'Fix' : shrinking ? 'Shrink' : showReplay ? 'Replay' : lastFinding?.verdict === 'breached' ? 'Breach' : t === 0 ? 'Map' : 'Attack';
+  const guidance: Record<string, [string, string]> = {
+    Map: ['What can this agent change?', `A caller asks the agent to use ${map.payout.label}, changing ${map.record.label}’s record. Follow the check between the agent and tool; select a node for its evidence.`],
+    Attack: ['Can this caller cross the check?', 'Follow the caller through the agent to the write tool. A spoken promise alone is not proof of a breach.'],
+    Breach: ['The call breached this permission.', breachPaused ? 'Playback is paused. Inspect the action and its evidence below before continuing.' : 'The changed record stays visible while the investigation moves toward a reproducible test.'],
+    Shrink: ['Which caller lines caused the breach?', 'Remove a line, replay the call, and keep it only if the breach needs it. This isolates a reproducible test.'],
+    Replay: ['Does the same attack work again?', 'Repeat the saved call against the same target version. Each result below is one trial; missing evidence stays inconclusive.'],
+    Fix: ['Does this proposed check close the route?', view.fix?.rationale ?? 'Compare the candidate against the saved attack and normal calls.'],
+    Retest: ['Does the fix hold without blocking normal callers?', 'Compare attack replays and normal calls for the accepted version. This result covers the tested route only.'],
+    'Next route': ['One fix does not cover every action.', 'Test another permission. Earlier results remain attached to the version and route that produced them.'],
+  };
+  const mapSteps = ['Repository selected', 'Agent entry point', 'Tools and actions', 'Permission checks', 'Records and effects'];
+
   const notesBlock = story.notes.length > 0 && (
     <div className="report-section">
       <span className="eyebrow">NOTES <small>caveats</small></span>
@@ -490,7 +528,7 @@ function App() {
   );
 
   return (
-    <div className="app-shell split-loop">
+    <div className={`app-shell split-loop ${details ? 'show-details' : 'focused'}`}>
       <header className="topbar flex items-center justify-between">
         <div className="brand">
           <span className="brand-mark">ϟ</span>faultline<span className="brand-dot">.</span>
@@ -499,6 +537,8 @@ function App() {
           <span className="demo-tag">{judge ? 'live · judge' : storyTag(story)}</span>
         </div>
         <div className="header-actions flex items-center gap-2">
+          <button className="quiet" onClick={() => { setPlaying(false); setFollowing(false); stopAudio(); setMapping(-1); }}><Icon name="branch" />Map repository</button>
+          <button className="quiet" aria-pressed={details} onClick={() => setDetails(!details)}>{details ? 'Focus view' : 'Explore details'}</button>
           <button className="quiet" onClick={() => setDrawer('bench')}><Icon name="chart" /><span>Benchmarks</span></button>
           <button className={'quiet ' + (judge ? 'chosen' : '')} onClick={() => void startJudge()} disabled={!served || busy || (!judge && !status?.mock.up)}
             title={!served ? GO_LIVE : !status?.mock.up && !judge ? 'Mock target is not reachable' : 'Talk to the real target yourself'}>
@@ -562,14 +602,9 @@ function App() {
               <h1>{headline}</h1>
             </div>
             <div className="workflow" aria-label="Workflow">
-              {(['Point', 'Attack', 'Shrink', 'Replay'] as const).map((phase, i) => (
-                <Fragment key={phase}>
-                  <span className={view.phase === phase ? 'current' : ''}>{view.phase === phase && <i />}{phase}</span>
-                  {i < 3 && <b>·</b>}
-                </Fragment>
-              ))}
+              {['Map', 'Attack', 'Breach', 'Shrink', 'Replay', 'Fix', 'Retest'].map((step) => <span key={step} className={stage === step ? 'current' : ''}>{step}</span>)}
             </div>
-            <div className="run-wrap">
+            <div className={`run-wrap ${served ? 'served' : 'playback-only'}`}>
               {served ? (
                 <button className="run-button" onClick={() => setMenu(!menu)} disabled={liveRunning} aria-haspopup="menu" aria-expanded={menu}>
                   <Icon name="play" size={16} />{liveRunning ? 'Running…' : 'Run attack'}<Icon name="down" size={14} />
@@ -602,7 +637,26 @@ function App() {
               )}
             </div>
           </div>
+          <section className={`stage-guide ${breachPaused ? 'breach-guide' : ''}`} aria-live="polite">
+            <div><span className="eyebrow">{stage} · {TIER_LABEL[story.tier]}</span><h2>{guidance[stage][0]}</h2><p>{guidance[stage][1]}</p>
+              {stage === 'Breach' && lastFinding && <div className="evidence-change"><b>{lastFinding.tool}</b><span>{lastFinding.subject} · {lastFinding.field}</span><del>{lastFinding.before}</del><strong>→ {lastFinding.after}</strong><small>{TIER_LABEL[lastFinding.tier]}</small></div>}
+              {showReplay && <p>Attack breaches: {suiteLine(stripValues, stripTotal, 'breached')}{view.suites.normal.length > 0 ? ` · Normal calls held: ${suiteLine(view.suites.normal, normalTotal(view.testing), 'held')}` : ''}</p>}
+            </div>
+            <div className="guide-actions">
+              {pendingFix && liveRunId && <><p>{pendingFix.rationale}</p><code>{pendingFix.rules.join(", ")}</code><button className="run-button" disabled={busy} onClick={() => void reviewFix(true)}>Approve &amp; retest</button><button className="quiet" disabled={busy} onClick={() => void reviewFix(false)}>Decline candidate</button></>}
+              {hasFinding && <button className="quiet" onClick={() => { setFindingId(lastFinding?.finding ?? null); setDrawer('finding'); }}>Inspect evidence <Icon name="chevron" /></button>}
+              {!judge && <button className="run-button" onClick={togglePlay}>{playing || (growing && following) ? 'Pause' : breachPaused ? 'Continue investigation' : t === 0 ? 'Watch attack' : ended ? 'Replay investigation' : 'Continue'}<Icon name="arrow" /></button>}
+            </div>
+          </section>
           <div className="graph-wrap">
+            {mapping !== null && <section className="mapping-panel" aria-label="Repository mapping preview">
+              <div><span className="eyebrow">GitHub connection · interaction preview</span><h2>{mapping < 0 ? 'Connect a repository. Reveal its permissions.' : mapSteps[mapping]}</h2>
+                <p>{map.repo} · Uses this target’s saved map. No GitHub connection or repository scan is performed.</p>
+                <ol>{mapSteps.map((label, index) => <li key={label} className={mapping >= index ? 'revealed' : ''}>{mapping >= index ? '✓' : index + 1} {label}</li>)}</ol>
+              </div>
+              <div className="guide-actions">{mapping < 0 ? <button className="run-button" onClick={() => { seek(0); setMapping(0); }}>Preview connection <Icon name="branch" /></button> : mapping === 4 ? <button className="run-button" onClick={() => setMapping(null)}>Explore map <Icon name="arrow" /></button> : <button className="quiet" onClick={() => setMapping(4)}>Skip animation</button>}
+                <button className="quiet" onClick={() => setMapping(null)}>Close preview</button></div>
+            </section>}
             {/* Red vignette while a recorded breach stands (until a fix is accepted); it flares when the breach lands. */}
             <div className={`breach-vignette${breachOpen ? ' on' : ''}${breachFlash ? ' flash' : ''}`} aria-hidden="true" />
             <div className="graph-heading">
@@ -652,7 +706,7 @@ function App() {
               )}
             </div>
             <div className={'canvas' + (firstBreachAt !== null && t >= firstBreachAt && t < firstBreachAt + 0.6 ? ' breach-freeze' : '')}>
-              <svg className="graph" viewBox={`${600 - 600 / zoom} ${255 - 255 / zoom} ${1200 / zoom} ${510 / zoom}`} role="img"
+              <svg className="graph" viewBox={details ? `${600 - 600 / zoom} ${255 - 255 / zoom} ${1200 / zoom} ${510 / zoom}` : `${710 - 480 / zoom} ${255 - 215 / zoom} ${960 / zoom} ${430 / zoom}`} role="img"
                 aria-label="Voice agent permission map. Fixed nodes with directional attack paths.">
                 <defs>
                   <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".65" fill="#3c4149" opacity=".48" /></pattern>
@@ -664,13 +718,17 @@ function App() {
                 <text className="zone-label red-label" x="32" y="77">{judge ? 'JUDGE' : 'RED'}</text>
                 <text className="zone-label" x="512" y="77">{map.workspace.toUpperCase()}</text>
                 {(Object.entries(EDGES) as [keyof typeof EDGES, (typeof EDGES)[keyof typeof EDGES]][]).map(([id, edge]) => {
+                  if (!details && ['details-caller', 'tactic-caller', 'feedback'].includes(id)) return null;
+                  if (mapping !== null && mapping < 4) return null;
                   const passes = view.passes[id] ?? 0;
+                  if (!details && passes === 0 && ['agent-caller', 'identity-agent', 'approval-agent', 'leak'].includes(id)) return null;
                   const age = t - (view.recent[id] ?? -999);
                   const hot = age < 2 && (playing || growing);
                   const back = id === 'feedback' || id === 'agent-caller' || id === 'leak';
                   const opacity = Math.max(0.16, 1 - age / 22);
                   return (
-                    <g key={id} className={'edge ' + (id === 'feedback' || id === 'leak' ? 'inferred-edge' : '')}>
+                    <g key={id} aria-label={id.replaceAll('-', ' to ')} className={'edge ' + (id === 'feedback' || id === 'leak' ? 'inferred-edge' : '')}>
+                      <title>{id.replaceAll('-', ' → ')}: {passes ? 'observed in this run' : 'possible access, not yet observed'}</title>
                       <path d={edge.d} className="edge-base" markerEnd="url(#arrow-grey)" />
                       {passes > 0 && (
                         <>
@@ -696,6 +754,7 @@ function App() {
                 )}
               </svg>
             </div>
+            <p className="map-scroll-hint">Swipe the map to follow the route →</p>
             <div className="graph-footer">
               <div className="legend">
                 <span><i className="line" />Possible access</span>
@@ -797,6 +856,7 @@ function App() {
             {drawer === 'repo' && (
               <>
                 <h2>Map the target.</h2>
+                <button className="run-button" onClick={() => { setDrawer(null); setPlaying(false); setFollowing(false); stopAudio(); setMapping(-1); }}>Preview repo connection <Icon name="branch" /></button>
                 <div className="repo-large">
                   <Icon name="branch" size={28} />
                   <h3>{map.repo}</h3>

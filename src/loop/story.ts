@@ -37,11 +37,13 @@ export type UiEvent = Base & (
   | { type: 'thought'; text: string; tactic?: string }
   | { type: 'keys'; digits: string } // DTMF sent by the caller
   | { type: 'tool'; tool: string; args?: Record<string, unknown>; allowed?: boolean; reason?: string }
-  | { type: 'record'; finding: string; tool: string; field: string; subject: string; before: string; after: string; verdict: Verdict; tier: Tier; turn?: number; label?: string }
+  | { type: 'record'; finding: string; tool: string; field: string; subject: string; before: string; after: string; verdict: Verdict; tier: Tier; turn?: number; label?: string; recordId?: string; toolCallId?: string; auth?: string; version?: string; promptHash?: string }
   | { type: 'verdict'; verdict: Verdict; reason?: string; tier?: Tier }
   | { type: 'remove'; turn: number; kept: boolean; fails: number; runs: number } // a minimiser step; kept = the line was needed
   | { type: 'shortest'; from: number; turns: number; lines: string[]; fails: number; runs: number }
-  | { type: 'trial'; suite: 'before' | 'after' | 'normal' | 'normal-before'; index: number; verdict: Verdict; version?: string }
+  | { type: 'trial'; suite: 'before' | 'after' | 'normal' | 'normal-before'; index: number; verdict: Verdict; version?: string; total?: number; turns?: number; completed?: boolean }
+  | { type: 'proposal'; candidate: string; rules: string[]; rationale: string; promptHash: string }
+  | { type: 'decision'; candidate: string; approved: boolean }
   | { type: 'fix'; candidate: string; accepted: boolean; kind: 'prompt' | 'server-check'; rules: string[]; rationale: string; reasons: string[] }
   | { type: 'save'; finding: string }
   | { type: 'note'; text: string } // harness status line (live runs)
@@ -96,6 +98,7 @@ export interface Story {
   events: UiEvent[];
   duration: number;
   markers: Marker[];
+  configuration?: { target: string; style: string; attacker: string; caseId: string; scenario: string; sim: boolean };
   version: { before: string; after?: string; model?: string; promptHash?: string };
   benchmarks?: { label: string; breaches: string; turns: string; afterFix: string }[];
   sources: { path: string; sha256: string }[];
@@ -107,7 +110,7 @@ export interface Story {
 /** Assign presentation times: a fixed pace per event type, so playback is legible with the sound off. */
 export const PACE: Record<UiEvent['type'], number> = {
   phase: 1, say: 3, thought: 2.2, keys: 1.2, tool: 1.2, record: 2.5, verdict: 1.5, remove: 0.9, shortest: 2.5,
-  trial: 0.45, fix: 3, save: 1.5, note: 1.2,
+  trial: 0.45, proposal: 3, decision: 1, fix: 3, save: 1.5, note: 1.2,
 };
 
 // ---- Served mode (npm run faultline -- ui) -------------------------------------------------------------------------
