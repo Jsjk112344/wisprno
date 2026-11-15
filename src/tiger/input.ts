@@ -14,7 +14,7 @@ function json(path: string): Json | null { return existsSync(path) ? JSON.parse(
 function walk(dir: string): string[] {
   if (!existsSync(dir)) return [];
   return readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name)).flatMap(e =>
-    e.isDirectory() ? (['sim', 'identity'].includes(e.name) ? [] : walk(join(dir, e.name))) : e.isFile() ? [join(dir, e.name)] : []);
+    e.isDirectory() ? (['sim', 'identity', 'live', 'ui'].includes(e.name) ? [] : walk(join(dir, e.name))) : e.isFile() ? [join(dir, e.name)] : []);
 }
 export function normalizeVerdict(value: unknown): string | null {
   if (value == null) return null;

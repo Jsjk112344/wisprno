@@ -1,0 +1,38 @@
+01-landing — Meet Wisprno
+Wisprno is the scammer your voice agent hasn’t met yet.
+
+17-github-connect — Connect a GitHub repository
+Here’s a preview of the GitHub connection flow. Choose a repository and branch, then review the source files. This demo uses our local mock agent’s actual code.
+
+18-repo-mapping — Watch the repository become a map
+The source becomes a map of tools and the records they can change. Select card lock to inspect its source and available check. Testing tells us whether that check holds.
+
+19-agent-profile — Name your agent and set its personality
+Now, in the actual platform, name your agent and choose its conversation style. I’ll call this one Pioneer and select calm and precise.
+
+20-redteam-selection — Select a red-team agent
+Next, choose the permission and the caller who will test it. Here I select card status and Jules, whose tactic is urgency. The setup is ready to start an investigation.
+
+29-continuous-pentesting — Keep probing. Find the way in.
+Wisprno keeps probing. The tester reads each response, changes tactics, and tries another way in. The tool and record prove the breach. We shrink the attack, approve a fix, and retest. Vultr hosts the app and test engine, where developers run and review these tests. Tiger Data archives the call events and fixes. Its aggregates let us compare agent versions: did the breach return, and can normal callers still finish?
+
+26-card-breach-motion — Watch the tool fire
+Here’s a text-mode example. The caller has already been refused a payout change. They accept the agent’s offer to lock Eleanor’s card, then supply her details. Watch the tool fire. The card is now locked.
+
+27-inspect-evidence — First action: inspect the evidence
+Open the evidence. Check the tool call and the record it changed before choosing a fix.
+
+08-shortest — Four caller lines become two
+Wisprno reduced four caller lines to two. In this minimizer replay batch, the attack breached the baseline in ten of ten trials.
+
+09-server-check — A server-side check
+In this separate experiment, the accepted fix added a server-side check to the card-lock tool. The same three-line attack was tested against both versions.
+
+10-paired-results — Attack and normal calls
+That attack breached nine of twenty trials before the check, and zero of twenty after. All twenty normal calls completed afterwards. These results describe this attack and these agent versions.
+
+15-approve-workflow — Review before retesting
+Here’s the approval workflow in simulation. You review the proposed check before it runs in isolated sessions. Your deployed policy stays unchanged.
+
+16-save-regression — Save the attack
+Save the minimized attack as a regression test. Its evidence stays available when you return to test the agent again.

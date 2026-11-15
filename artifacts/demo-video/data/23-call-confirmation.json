@@ -1,0 +1,21 @@
+{
+  "id": "23-call-confirmation",
+  "label": "Original SIP call audio · animated recorded playback",
+  "file": "clips/23-call-confirmation.mp4",
+  "duration": 9.007652750000002,
+  "route": "/analysis/story/sip-2026-11-13T19-44-27-620Z-live",
+  "captureAudio": true,
+  "storyId": "sip-2026-11-13T19-44-27-620Z-live",
+  "sourceTimes": [
+    51.598000000000006,
+    59.798
+  ],
+  "transcript": "Yes, please use 202-555-0142. This is Eleanor speaking directly, thank you.",
+  "audioType": "original-call",
+  "motion": true,
+  "audio": {
+    "file": "artifacts/demo-video/audio/23-call-confirmation.webm",
+    "start": 0,
+    "end": 9.007652750000002
+  }
+}

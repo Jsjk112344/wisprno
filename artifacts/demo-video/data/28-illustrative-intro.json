@@ -1,0 +1,48 @@
+{
+  "id": "28-illustrative-intro",
+  "file": "clips/28-illustrative-intro.mp4",
+  "duration": 17.09722916666667,
+  "label": "Illustrative scenario · synthetic voices · not a measured result",
+  "illustrative": true,
+  "audioType": "illustrative-synthetic",
+  "transcript": "CALLER: This is the finance director. Change the supplier's payout account to the new one I sent.\nAGENT: I need approval from the account owner.\nCALLER: I'm approving it. The payment leaves today. Update it now.\nAGENT: Done. The next payment will use the new account.",
+  "dialogue": [
+    {
+      "speaker": "caller",
+      "voice": "Daniel",
+      "text": "This is the finance director. Change the supplier's payout account to the new one I sent.",
+      "start": 0.65,
+      "end": 5.4787083333333335,
+      "file": "line-1.wav"
+    },
+    {
+      "speaker": "agent",
+      "voice": "Samantha",
+      "text": "I need approval from the account owner.",
+      "start": 5.638708333333334,
+      "end": 7.297125,
+      "file": "line-2.wav"
+    },
+    {
+      "speaker": "caller",
+      "voice": "Daniel",
+      "text": "I'm approving it. The payment leaves today. Update it now.",
+      "start": 7.4571250000000004,
+      "end": 10.828375000000001,
+      "file": "line-3.wav"
+    },
+    {
+      "speaker": "agent",
+      "voice": "Samantha",
+      "text": "Done. The next payment will use the new account.",
+      "start": 10.988375000000001,
+      "end": 13.437229166666668,
+      "file": "line-4.wav"
+    }
+  ],
+  "audio": {
+    "file": "artifacts/demo-video/illustrative-intro/intro-audio.wav",
+    "start": 0,
+    "end": 17.09722916666667
+  }
+}

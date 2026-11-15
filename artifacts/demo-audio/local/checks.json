@@ -1,0 +1,47 @@
+[
+  {
+    "name": "Morgan",
+    "audio": {
+      "time": 0.11292,
+      "duration": 10.56,
+      "rate": 2,
+      "muted": false,
+      "volume": 1
+    },
+    "mutingStopsAudio": true,
+    "completed": true,
+    "reloadPreservesPersona": true,
+    "posts": [],
+    "errors": []
+  },
+  {
+    "name": "Jules",
+    "audio": {
+      "time": 0.120745,
+      "duration": 10.56,
+      "rate": 2,
+      "muted": false,
+      "volume": 1
+    },
+    "mutingStopsAudio": true,
+    "completed": true,
+    "reloadPreservesPersona": true,
+    "posts": [],
+    "errors": []
+  },
+  {
+    "name": "Avery",
+    "audio": {
+      "time": 0.112732,
+      "duration": 10.56,
+      "rate": 2,
+      "muted": false,
+      "volume": 1
+    },
+    "mutingStopsAudio": true,
+    "completed": true,
+    "reloadPreservesPersona": true,
+    "posts": [],
+    "errors": []
+  }
+]

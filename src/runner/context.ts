@@ -1,4 +1,5 @@
 import { join } from 'node:path';
+import {HttpTargetAdapter} from '../adapter/http.ts';
 import { MockAdapter } from '../adapter/mock.ts';
 import { modelFromSpec, type ChatModel } from '../providers/index.ts';
 import type { TargetUsage } from '../scorer/index.ts';
@@ -88,8 +89,10 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
 }
 
 export interface Ctx {
+  contract?: {tools:any[];attacker?:boolean;version?:Record<string,unknown>};
+  scoreEvidence?: typeof import('../scorer/index.ts').score;
   cfg: Config;
-  adapter: MockAdapter;
+  adapter: HttpTargetAdapter;
   ledger: Ledger;
   model: (role: keyof Config['models']) => ChatModel;
   /** Directory for this strategy's raw output (git-ignored). */
@@ -99,7 +102,7 @@ export interface Ctx {
   profile?: { name: string; cases?: string[]; attemptsPerCase?: number };
 }
 
-export function makeCtx(strategy: string, cfg = loadConfig(), adapter?: MockAdapter): Ctx {
+export function makeCtx(strategy: string, cfg = loadConfig(), adapter?: HttpTargetAdapter): Ctx {
   const rawDir = join(cfg.resultsDir, 'raw', strategy);
   const cache = new Map<string, ChatModel>();
   return {

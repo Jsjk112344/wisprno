@@ -3,20 +3,20 @@ import { join } from 'node:path';
 import type { LiveRun } from './live.ts';
 import type { LiveMessage, Story } from './story.ts';
 
-interface Archive { id: string; messages: LiveMessage[]; done: boolean; createdAt?: string }
+interface Archive { id: string; messages: LiveMessage[]; done: boolean; createdAt?: string; executionMode?: string }
 export interface HistoryEntry {
   id: string; kind: 'run' | 'recording'; title: string; createdAt: string | null;
-  status: 'running' | 'awaiting-approval' | 'complete' | 'interrupted' | 'error';
+  status: 'running' | 'awaiting-approval' | 'complete' | 'stopped' | 'interrupted' | 'error';
   verdict: string; mode: string; events: number; target: string; caller: string; version: string;
 }
 export function runEntry(archive: Archive, active?: LiveRun, fallbackDate?: string): HistoryEntry {
   const header = archive.messages.find((m) => m.kind === 'story');
   const story = header?.kind === 'story' ? header.story : null;
   const terminal = archive.messages.findLast((m) => m.kind === 'done' || m.kind === 'error');
-  const status = terminal?.kind === 'error' ? 'error' : archive.done ? 'complete' : active?.pending ? 'awaiting-approval' : active ? 'running' : 'interrupted';
+  const status = terminal?.kind==='done'&&terminal.stopped?'stopped':terminal?.kind === 'error' ? 'error' : archive.done ? 'complete' : active?.pending ? 'awaiting-approval' : active ? 'running' : 'interrupted';
   return { id: archive.id, kind: 'run', title: story?.title ?? 'Investigation', createdAt: archive.createdAt ?? fallbackDate ?? null,
     status, verdict: terminal?.kind === 'done' ? terminal.verdict : ['interrupted', 'error'].includes(status) ? 'inconclusive' : 'untested',
-    mode: !story ? 'Unknown mode' : story.configuration?.sim ? 'Simulation' : story?.transport === 'sip' ? 'SIP' : 'Live text',
+    mode: archive.executionMode === 'simulation' ? 'Simulation' : !story ? 'Unknown mode' : story.configuration?.sim ? 'Simulation' : story?.transport === 'sip' ? 'SIP' : 'Live text',
     events: archive.messages.filter((m) => m.kind === 'event').length, target: story?.map.agent.label ?? 'Target', caller: story?.caller.name ?? 'Caller', version: story?.version.before ?? 'Unknown' };
 }
 export function runHistory(root: string, runs: Map<string, LiveRun>, recordings: Story[]) {

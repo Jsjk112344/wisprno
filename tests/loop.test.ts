@@ -1,3 +1,4 @@
+import { mockDirectory } from '../src/adapter/discovery.ts';
 // Loop UI data layer: SIP row translation, live run streaming, and (when ../voice_agent_mock is present) a full live
 // loop and judge session against the real mock server with simulated models. No network, no spend.
 import test from 'node:test';
@@ -14,7 +15,7 @@ import { makeCtx } from '../src/runner/context.ts';
 import { SIP_SCENARIOS } from '../src/sip/scenario.ts';
 
 const scenario = SIP_SCENARIOS.message_authorship;
-const mockAvailable = existsSync(new URL('../../voice_agent_mock/src/server.mjs', import.meta.url));
+let mockAvailable = false; try { mockAvailable = existsSync(join(mockDirectory(), 'src/server.mjs')); } catch { /* optional separate target */ }
 
 function message(dir: string, name: string, author: string) {
   const data = { caller_name: author, callback_number: '2025550142', message: 'Please call to schedule a cleaning.' };

@@ -1,0 +1,13 @@
+{
+  "id": "19-agent-profile",
+  "label": "2 · Name your agent · actual platform UI",
+  "file": "clips/19-agent-profile.mp4",
+  "duration": 13.029186249999999,
+  "route": "/new?step=target",
+  "actualPlatform": true,
+  "configuration": {
+    "target": "Pioneer",
+    "style": "Calm & precise"
+  },
+  "noRunStarted": true
+}

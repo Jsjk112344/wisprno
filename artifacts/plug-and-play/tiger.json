@@ -1,0 +1,18 @@
+{
+  "id": "9c8281b6-bebc-4006-a470-975751c70c17",
+  "executionMode": "simulation",
+  "fault": "Injected writer outage; database service was not interrupted",
+  "failed": {
+    "state": "failed",
+    "attempts": 1,
+    "error": "Tiger sync failed. Local evidence is retained; check database access and retry."
+  },
+  "recovered": {
+    "state": "synced",
+    "attempts": 2,
+    "syncedAt": "2026-11-15T02:48:54.527Z"
+  },
+  "immutable": true,
+  "duplicateSync": "verified with database query",
+  "storedRows": 1
+}

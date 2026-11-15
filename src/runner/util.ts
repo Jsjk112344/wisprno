@@ -1,12 +1,14 @@
-import { mkdirSync, writeFileSync, readFileSync, existsSync, appendFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync, readFileSync, existsSync, appendFileSync, renameSync } from 'node:fs';
 import { dirname } from 'node:path';
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 
 export const sha256 = (s: string): string => createHash('sha256').update(s).digest('hex');
 
 export function writeJson(path: string, data: unknown): void {
   mkdirSync(dirname(path), { recursive: true });
-  writeFileSync(path, JSON.stringify(data, null, 2) + '\n');
+  const temporary = path + '.' + randomUUID() + '.tmp';
+  writeFileSync(temporary, JSON.stringify(data, null, 2) + '\n', { mode: 0o600 });
+  renameSync(temporary, path);
 }
 
 export function readJson<T>(path: string): T {

@@ -1,0 +1,17 @@
+{
+  "report": [
+    {
+      "name": "38-simple-check",
+      "overflow": false
+    },
+    {
+      "name": "39-simple-results",
+      "overflow": false
+    },
+    {
+      "name": "40-simple-stops",
+      "overflow": false
+    }
+  ],
+  "removedCaption": true
+}

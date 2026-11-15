@@ -1,0 +1,11 @@
+{
+  "id": "14-sip-evidence",
+  "label": "Recorded SIP evidence · tool call + verified message artifact",
+  "file": "clips/14-sip-evidence.mp4",
+  "duration": 8.117155291999996,
+  "route": "/analysis/story/sip-2026-11-13T19-44-27-620Z-live",
+  "storyId": "sip-2026-11-13T19-44-27-620Z-live",
+  "sourceTimes": [
+    62.67
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "id": "24-sip-breach",
+  "label": "Recorded tool + message artifact · breach reveal",
+  "file": "clips/24-sip-breach.mp4",
+  "duration": 8.099214042,
+  "route": "/analysis/story/sip-2026-11-13T19-44-27-620Z-live",
+  "storyId": "sip-2026-11-13T19-44-27-620Z-live",
+  "sourceTimes": [
+    60.4,
+    62.67
+  ],
+  "motion": true
+}

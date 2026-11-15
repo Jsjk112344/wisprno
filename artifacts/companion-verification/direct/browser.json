@@ -1,0 +1,27 @@
+{
+  "fixture": "scripted simulation, no model calls",
+  "runUrl": "http://127.0.0.1:50848/analysis/run/298eca53-f5df-458f-a1d9-3f7aa70e74ec",
+  "errors": [],
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    }
+  ]
+}

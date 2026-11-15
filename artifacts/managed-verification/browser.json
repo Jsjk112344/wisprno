@@ -1,0 +1,33 @@
+{
+  "runUrl": "http://127.0.0.1:57743/analysis/run/80101c74-80f1-415b-8bb8-3e96d7cf8aaa",
+  "job": "6243925d-04a2-4a5d-bd3a-670050809ad3",
+  "startupCreatedRun": false,
+  "reloadResumedJob": true,
+  "fullScriptedWorkflow": true,
+  "errors": [],
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    }
+  ],
+  "paidCalls": 0,
+  "productionChanged": false,
+  "publicSandboxVerified": false
+}

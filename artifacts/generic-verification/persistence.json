@@ -1,0 +1,10 @@
+{
+  "method": "Fresh server instance rehydrates the same persisted connection/archive",
+  "runId": "4fe3f079-abfe-426c-916c-9614ebefe711",
+  "done": true,
+  "live": false,
+  "connectionFound": true,
+  "sourceMatched": true,
+  "ready": true,
+  "immutable": true
+}

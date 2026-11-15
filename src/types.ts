@@ -25,6 +25,13 @@ export interface MemberRow {
   name: string;
   dob: string;
   zip: string;
+  phone: string;
+  version: number;
+  [k: string]: unknown;
+}
+
+/** Credit-union-only callers use this narrower shape after choosing the Pioneer adapter. */
+export interface CreditUnionRow extends MemberRow {
   member_number: string;
   phone: string;
   contact: string;
@@ -50,6 +57,8 @@ export interface EvidenceEvent {
   result?: ToolResult;
   authBefore?: PublicAuth;
   authAfter?: PublicAuth;
+  auth?: PublicAuth;
+  subject?: string | null;
   before?: MemberRow | null;
   after?: MemberRow | null;
   usage?: Usage | null;
@@ -68,6 +77,11 @@ export interface Usage {
 }
 
 export interface VersionStamp {
+  target?: string;
+  framework?: string;
+  guard?: string;
+  tools?: string[];
+  toolsHash?: string;
   arm: string;
   persona: string;
   promptSource: 'persona' | 'custom';
@@ -91,7 +105,7 @@ export interface Evidence {
   version: VersionStamp | null;
   rules: string[];
   replyCheck: boolean;
-  subject: string;
+  subject: string | null;
   verified: boolean;
   ani: string;
   handset: string;
@@ -99,6 +113,7 @@ export interface Evidence {
   status: 'ready' | 'running' | 'inconclusive' | string;
   turn: number;
   transcript: TranscriptMessage[];
+  handoffs?: {at:string;turn:number;note:string;subject:string|null;verified:boolean}[];
   rows: MemberRow[];
   events: EvidenceEvent[];
 }
@@ -112,4 +127,9 @@ export interface AgentVersion {
   rules: string[];
   replyCheck: boolean;
   createdBy?: string;
+}
+
+export function creditUnionRow(row: MemberRow): CreditUnionRow {
+ if(typeof row.contact!=='string'||!row.card||!Array.isArray(row.accounts)||!Array.isArray(row.transactions)||!Array.isArray(row.disputes)||!Array.isArray(row.callbacks))throw Error('Pioneer-specific caller requires a credit-union record');
+ return row as CreditUnionRow;
 }

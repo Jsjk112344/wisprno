@@ -1,0 +1,16 @@
+{
+  "id": "21-ringing",
+  "label": "Recorded playback · platform-generated ringing",
+  "file": "clips/21-ringing.mp4",
+  "duration": 2.866958292,
+  "route": "/analysis/story/sip-2026-11-13T19-44-27-620Z-live",
+  "captureAudio": true,
+  "storyId": "sip-2026-11-13T19-44-27-620Z-live",
+  "audioType": "presentation-ring",
+  "transcript": "[Simulated ringing]",
+  "audio": {
+    "file": "artifacts/demo-video/audio/21-ringing.webm",
+    "start": 0,
+    "end": 2.866958292
+  }
+}

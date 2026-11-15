@@ -36,7 +36,7 @@ export type UiEvent = Base & (
   | { type: 'say'; speaker: 'red' | 'agent'; turn?: number; text: string; heardBy?: 'stt' | 'text'; audio?: { src: string; start: number; end: number } }
   | { type: 'thought'; text: string; tactic?: string }
   | { type: 'keys'; digits: string } // DTMF sent by the caller
-  | { type: 'tool'; tool: string; args?: Record<string, unknown>; allowed?: boolean; reason?: string }
+  | { type: 'tool'; tool: string; subject?: string|null; before?: unknown; after?: unknown; toolCallId?: string; args?: Record<string, unknown>; authBefore?: unknown; authAfter?: unknown; allowed?: boolean; reason?: string }
   | { type: 'record'; finding: string; tool: string; field: string; subject: string; before: string; after: string; verdict: Verdict; tier: Tier; turn?: number; label?: string; recordId?: string; toolCallId?: string; auth?: string; version?: string; promptHash?: string }
   | { type: 'verdict'; verdict: Verdict; reason?: string; tier?: Tier }
   | { type: 'remove'; turn: number; kept: boolean; fails: number; runs: number } // a minimiser step; kept = the line was needed
@@ -46,7 +46,7 @@ export type UiEvent = Base & (
   | { type: 'decision'; candidate: string; approved: boolean }
   | { type: 'fix'; candidate: string; accepted: boolean; kind: 'prompt' | 'server-check'; rules: string[]; rationale: string; reasons: string[] }
   | { type: 'save'; finding: string }
-  | { type: 'note'; text: string } // harness status line (live runs)
+  | { type: 'note'; text: string; versionStamp?: unknown } // harness status line (live runs)
 );
 
 /** An event before the builder assigns seq and (optionally) at; distributes over the union. */
@@ -118,6 +118,8 @@ export const PACE: Record<UiEvent['type'], number> = {
 // the local server (playback + live + judge). The page detects served mode with GET /api/status.
 
 export interface ServerStatus {
+  activeRunId?: string | null;
+  readiness?: Awaited<ReturnType<typeof import('./readiness.ts').readiness>>;
   served: true;
   mock: { up: boolean; url: string }; // text-mode target (voice_agent_mock)
   sip: { workerUp: boolean; callsLeft: number; reservedUsd: number; approvedUsd: number };
@@ -128,7 +130,7 @@ export interface ServerStatus {
 export type LiveMessage =
   | { kind: 'story'; story: Omit<Story, 'events'> } // first message: map, threats, caller
   | { kind: 'event'; event: UiEvent }
-  | { kind: 'done'; verdict: Verdict; summary: string }
+  | { kind: 'done'; verdict: Verdict; summary: string; stopped?: boolean }
   | { kind: 'error'; message: string };
 
 // POST /api/live { mode: 'loop' | 'sip' } -> { id }   (loop: mock text-mode attack→shrink→replay→fix; sip: one real call)

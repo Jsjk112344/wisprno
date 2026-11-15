@@ -1,0 +1,25 @@
+{
+  "url": "https://wisprno.us/demo",
+  "release": "20261115T031329Z-generic",
+  "rollback": "/opt/wisprno/releases/20261115T025727Z-generic",
+  "backup": "/root/wisprno-backups/20261115T031329Z-generic",
+  "sourceStory": "checks-round-02",
+  "sourceFile": "ui/loop/stories.json",
+  "sourceSha256": "9e9b9809adb4ea0b6b5fd9308e66fde3ce8d14831a68aa4da9354505e332b6e9",
+  "sourceUnchanged": true,
+  "behavior": "Guided repository setup and interactive playback of recorded banking evidence; candidate approvals control playback only. No new agent execution, uploads, patch application, model calls or Tiger writes. Exported tests and reports download locally.",
+  "speeds": [
+    1,
+    5,
+    10,
+    50
+  ],
+  "verification": {
+    "backendTests": 120,
+    "uiTests": 9,
+    "localBrowser": "local/checks.json",
+    "publicBrowser": "public/checks.json"
+  },
+  "modelSpendUsd": 0,
+  "heldOutSpecimen": "untouched"
+}

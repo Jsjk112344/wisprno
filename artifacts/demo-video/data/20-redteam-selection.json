@@ -1,0 +1,15 @@
+{
+  "id": "20-redteam-selection",
+  "label": "3 · Select a red-team agent · actual platform UI",
+  "file": "clips/20-redteam-selection.mp4",
+  "duration": 15.073647458000003,
+  "route": "/new?step=select",
+  "actualPlatform": true,
+  "configuration": {
+    "target": "Pioneer",
+    "style": "Calm & precise",
+    "attacker": "jules",
+    "caseId": "lost_card"
+  },
+  "noRunStarted": true
+}

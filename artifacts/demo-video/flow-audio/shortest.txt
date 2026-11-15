@@ -1,0 +1,1 @@
+Wisprno shrank four caller lines to two. That two-line attack breached the baseline in ten of ten minimizer replays.

@@ -1,0 +1,47 @@
+[
+  {
+    "scene": "28-illustrative-intro",
+    "source_start": 0,
+    "duration": 17.1
+  },
+  {
+    "scene": "26-card-breach-motion",
+    "source_start": 11,
+    "duration": 10
+  },
+  {
+    "scene": "27-inspect-evidence",
+    "source_start": 0,
+    "duration": 4
+  },
+  {
+    "scene": "B1-separate",
+    "source_start": 0,
+    "duration": 3
+  },
+  {
+    "scene": "09-server-check",
+    "source_start": 0,
+    "duration": 6
+  },
+  {
+    "scene": "10-paired-results",
+    "source_start": 0,
+    "duration": 8
+  },
+  {
+    "scene": "15-approve-workflow",
+    "source_start": 4,
+    "duration": 5
+  },
+  {
+    "scene": "16-save-regression",
+    "source_start": 1,
+    "duration": 3
+  },
+  {
+    "scene": "B2-end",
+    "source_start": 0,
+    "duration": 4
+  }
+]

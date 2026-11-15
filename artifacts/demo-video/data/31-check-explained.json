@@ -1,0 +1,11 @@
+{
+  "id": "31-check-explained",
+  "label": "Server-side check from the separate checks experiment",
+  "file": "clips/31-check-explained.mp4",
+  "duration": 12.031807415999996,
+  "route": "/analysis/story/checks-round-02",
+  "storyId": "checks-round-02",
+  "sourceTimes": [
+    146.1
+  ]
+}

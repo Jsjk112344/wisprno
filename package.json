@@ -20,7 +20,10 @@
     "tiger:chart": "node scripts/serve-tiger.ts",
     "ui:replay": "node scripts/build-replay-ui.ts",
     "ui:install": "npm --prefix faultline-ui ci",
-    "ui:start": "npm run ui:build && npm run faultline -- ui --sim --port 4321"
+    "ui:start": "npm run ui:build && npm run faultline -- ui --sim --port 4321",
+    "ui:sim": "npm run ui:start",
+    "ui:live": "npm run ui:build && npm run faultline -- ui --port 4323",
+    "companion": "node scripts/companion.mjs"
   },
   "license": "MIT",
   "devDependencies": {

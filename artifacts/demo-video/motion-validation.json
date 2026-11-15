@@ -1,0 +1,6 @@
+{
+  "movingGraphPaths": true,
+  "vignetteAbsentBeforeRecord": true,
+  "vignetteAppearsAtConfirmedBreach": true,
+  "vignetteClearsForAcceptedCheck": true
+}

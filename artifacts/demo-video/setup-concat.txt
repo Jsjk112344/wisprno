@@ -1,0 +1,4 @@
+file '/Users/justin/Desktop/Projects/hackumass/umass_agent_arena/artifacts/demo-video/edit-segments/17-github-connect.mp4'
+file '/Users/justin/Desktop/Projects/hackumass/umass_agent_arena/artifacts/demo-video/edit-segments/18-repo-mapping.mp4'
+file '/Users/justin/Desktop/Projects/hackumass/umass_agent_arena/artifacts/demo-video/edit-segments/19-agent-profile.mp4'
+file '/Users/justin/Desktop/Projects/hackumass/umass_agent_arena/artifacts/demo-video/edit-segments/20-redteam-selection.mp4'

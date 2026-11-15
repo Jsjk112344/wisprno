@@ -1,0 +1,43 @@
+[
+  {
+    "start": 135.035009292,
+    "end": 158.97048429199998,
+    "title": "Analyze the confirmed breach",
+    "text": "As you can see here, the agent locked someone else’s card. The flaw is in authorization: the caller supplied personal details, and the backend accepted them without the required one-time code. The scorer confirms the failure from the tool call and changed record. That ends this attack attempt. Wisprno saves the evidence and moves on to replay."
+  },
+  {
+    "id": "shortest",
+    "title": "Explain the minimized attack",
+    "text": "We then remove unnecessary lines and replay what remains. Just two caller lines were enough to breach this baseline in all ten minimizer replays.",
+    "start": 158.97048429199998,
+    "end": 171.97048429199998
+  },
+  {
+    "id": "separate",
+    "title": "Separate the experiments",
+    "text": "Now, a separate card-lock experiment.",
+    "start": 171.97048429199998,
+    "end": 174.97048429199998
+  },
+  {
+    "id": "check",
+    "title": "Explain the server-side fix",
+    "text": "Here, the fix moves the requirement into the server. Even if the agent agrees to the request, the tool cannot proceed without a verified code.",
+    "start": 174.97048429199998,
+    "end": 186.97048429199998
+  },
+  {
+    "id": "results",
+    "title": "Read the paired results",
+    "text": "As you can see, the same attack went from nine breaches in twenty trials to zero in twenty. All twenty normal calls still completed. These results describe this attack and these agent versions.",
+    "start": 186.97048429199998,
+    "end": 201.97048429199998
+  },
+  {
+    "id": "stops",
+    "title": "Explain the three stopping scopes",
+    "text": "This demo stops at the end of saved playback. A connected investigation tests one action and one approved fix, with three attack replays and normal calls. The original experiment runs up to eight rounds. It stops earlier at a spending limit or when no new actionable failure is found. Three rejected fixes leave that failure unresolved.",
+    "start": 201.97048429199998,
+    "end": 225.97048429199998
+  }
+]

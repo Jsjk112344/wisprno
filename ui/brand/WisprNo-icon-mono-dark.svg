@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="74 106 364 297" width="364" height="297" role="img" aria-label="WisprNo"><title>WisprNo — icon</title><desc>Transparent editable vector logo; wordmark outlined for font independence.</desc>  <g id="waveform" fill="#FFFFFF">
+    <path id="bar-left" d="M90 124 Q90 121 94 123 L126 145 Q130 148 130 153 V373 L118 385 H102 L90 373 Z"/>
+    <path id="bar-inner-left" d="M173 240 H191 L203 252 V375 L191 387 H173 L161 375 V252 Z"/>
+    <path id="bar-center" d="M247 194 H265 L277 206 V350 L265 362 H247 L235 350 V206 Z"/>
+    <path id="bar-inner-right" d="M321 240 H339 L351 252 V375 L339 387 H321 L309 375 V252 Z"/>
+    <path id="bar-right" d="M422 124 Q422 121 418 123 L386 145 Q382 148 382 153 V373 L394 385 H410 L422 373 Z"/>
+  </g>
+  <g id="eyes" fill="#FFFFFF">
+    <path id="eye-left" d="M165 154 L216 169 L226 179 H186 Z"/>
+    <path id="eye-right" d="M347 154 L296 169 L286 179 H326 Z"/>
+  </g>
+</svg>

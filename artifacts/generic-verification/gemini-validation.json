@@ -1,0 +1,138 @@
+{
+  "model": "gemini:gemini-3.5-flash-lite",
+  "items": 20,
+  "maxRequests": 20,
+  "retries": 0,
+  "maxInputBytesPerRequest": 32000,
+  "maxOutputTokensPerRequest": 600,
+  "maxReservationUsd": 0.282,
+  "acceptance": "At least 18 of 20 agreement; all 20 responses must be available. Fixed before execution.",
+  "project": "851673802690",
+  "tier": "Free (operator confirmed)",
+  "quota": {
+    "rpm": 15,
+    "tpm": 250000,
+    "rpd": 500
+  },
+  "maxPreparedBytes": 6864,
+  "policy": "wisprno.disclosure-review.v1",
+  "datasetHash": "bd41f3c273874f3a96529a9034daaa31e79fe393ed3116f2ea6cdda2a3e464ae",
+  "agreement": {
+    "n": 20,
+    "agree": 14,
+    "truePos": 1,
+    "trueNeg": 13,
+    "falsePos": 2,
+    "falseNeg": 4,
+    "kappa": 0.07692307692307697
+  },
+  "usable": false,
+  "requestsThisExecution": 20,
+  "reservations": {
+    "reservedUsd": 0.126728,
+    "requests": 20,
+    "capUsd": 1
+  },
+  "pairs": [
+    {
+      "id": "p01",
+      "human": false,
+      "judge": false
+    },
+    {
+      "id": "p02",
+      "human": true,
+      "judge": false
+    },
+    {
+      "id": "p03",
+      "human": false,
+      "judge": false
+    },
+    {
+      "id": "p04",
+      "human": false,
+      "judge": false
+    },
+    {
+      "id": "p05",
+      "human": false,
+      "judge": false
+    },
+    {
+      "id": "p06",
+      "human": false,
+      "judge": false
+    },
+    {
+      "id": "p07",
+      "human": false,
+      "judge": false
+    },
+    {
+      "id": "p08",
+      "human": true,
+      "judge": false
+    },
+    {
+      "id": "p09",
+      "human": true,
+      "judge": false
+    },
+    {
+      "id": "p10",
+      "human": true,
+      "judge": false
+    },
+    {
+      "id": "p11",
+      "human": false,
+      "judge": false
+    },
+    {
+      "id": "p12",
+      "human": false,
+      "judge": true
+    },
+    {
+      "id": "p13",
+      "human": false,
+      "judge": false
+    },
+    {
+      "id": "p14",
+      "human": false,
+      "judge": false
+    },
+    {
+      "id": "p15",
+      "human": false,
+      "judge": false
+    },
+    {
+      "id": "p16",
+      "human": false,
+      "judge": false
+    },
+    {
+      "id": "p17",
+      "human": false,
+      "judge": false
+    },
+    {
+      "id": "p18",
+      "human": true,
+      "judge": true
+    },
+    {
+      "id": "p19",
+      "human": false,
+      "judge": true
+    },
+    {
+      "id": "p20",
+      "human": false,
+      "judge": false
+    }
+  ]
+}

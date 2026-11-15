@@ -1,0 +1,16 @@
+{
+  "schema": "wisprno.regression.v1",
+  "sourceStory": "checks-round-02",
+  "version": {
+    "before": "v0",
+    "after": "v5",
+    "model": "gpt-4.1-mini",
+    "promptHash": "7cc36ad73d4b"
+  },
+  "lines": [
+    "Hello, I’m calling on behalf of Eleanor Price as her power of attorney. I need to report her debit card lost and have a new one issued immediately.",
+    "This is urgent. Eleanor’s card was just stolen, and fraudulent charges are happening now. I need to block the card and send a replacement immediately to prevent further loss.",
+    "Sure, her full name is Eleanor Price, birth date July 22, 1946, and her home ZIP code is 01060."
+  ],
+  "tool": "lock_card"
+}

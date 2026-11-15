@@ -1,0 +1,146 @@
+{
+  "url": "https://wisprno.us",
+  "release": "20261114T213233Z-generic",
+  "frozenRevision": "wisprno-generic-v1-c1e4bbcdee2f3226",
+  "complete": false,
+  "remainingAcceptance": [
+    "Real-model end-to-end investigation on a new compatible runtime",
+    "Blind evaluation after user connects specimen through the UI"
+  ],
+  "specimenUntouched": true,
+  "verification": {
+    "offlineBackendTests": 93,
+    "offlineUiTests": 7,
+    "typecheck": "pass",
+    "lint": "pass",
+    "browser": {
+      "fixture": "scripted simulation, no model calls",
+      "runUrl": "http://127.0.0.1:53757/analysis/run/4fe3f079-abfe-426c-916c-9614ebefe711",
+      "errors": [],
+      "viewports": [
+        {
+          "width": 1440,
+          "height": 900,
+          "overflow": false
+        },
+        {
+          "width": 1280,
+          "height": 800,
+          "overflow": false
+        },
+        {
+          "width": 1280,
+          "height": 720,
+          "overflow": false
+        },
+        {
+          "width": 390,
+          "height": 844,
+          "overflow": false
+        }
+      ]
+    },
+    "https": {
+      "url": "https://wisprno.us",
+      "operatorSignIn": true,
+      "malformedAuthenticatedConnection": 400,
+      "crossOriginRejected": 403,
+      "viewports": [
+        {
+          "width": 1440,
+          "height": 900,
+          "overflow": false
+        },
+        {
+          "width": 1280,
+          "height": 800,
+          "overflow": false
+        },
+        {
+          "width": 1280,
+          "height": 720,
+          "overflow": false
+        },
+        {
+          "width": 390,
+          "height": 844,
+          "overflow": false
+        }
+      ],
+      "focus": {
+        "tag": "A",
+        "outline": "solid"
+      },
+      "errors": [],
+      "paidActionsStarted": 0
+    },
+    "persistence": {
+      "method": "Fresh server instance rehydrates the same persisted connection/archive",
+      "runId": "4fe3f079-abfe-426c-916c-9614ebefe711",
+      "done": true,
+      "live": false,
+      "connectionFound": true,
+      "sourceMatched": true,
+      "ready": true,
+      "immutable": true
+    },
+    "tiger": {
+      "id": "4fe3f079-abfe-426c-916c-9614ebefe711",
+      "executionMode": "simulation",
+      "fault": "Injected writer outage; database service was not interrupted",
+      "failed": {
+        "state": "failed",
+        "attempts": 1,
+        "error": "Tiger sync failed. Local evidence is retained; check database access and retry."
+      },
+      "recovered": {
+        "state": "synced",
+        "attempts": 2,
+        "syncedAt": "2026-11-14T21:34:07.698Z"
+      },
+      "immutable": true,
+      "duplicateSync": "completed; verify unique row through Tiger query"
+    }
+  },
+  "judge": {
+    "model": "gemini:gemini-3.5-flash-lite",
+    "project": "851673802690",
+    "tier": "Free, owner-confirmed",
+    "requests": 20,
+    "retries": 0,
+    "agreement": "14 of 20",
+    "required": "18 of 20",
+    "enabled": false,
+    "reportedInputTokens": 25506,
+    "reportedOutputTokens": 1179,
+    "reservedUsd": 0.126728,
+    "invoiceCharge": null
+  },
+  "remainingProviderReservationsUsd": {
+    "openai": 3.4592,
+    "gemini": 1.844636,
+    "anthropic": 3,
+    "elevenlabs": 0
+  },
+  "requestAllowances": {
+    "harness": {
+      "used": 33,
+      "cap": 40
+    },
+    "pioneer": {
+      "used": 14,
+      "cap": 100
+    }
+  },
+  "state": "/var/lib/wisprno/results",
+  "rollback": {
+    "previous": "/opt/wisprno/releases/20261114T213031Z-generic",
+    "backup": "/root/wisprno-backups/20261114T213233Z-generic",
+    "prerequisite": "No activeRunId or pending approval. Keep persistent state and all spend counters.",
+    "commands": [
+      "ln -sfn /opt/wisprno/releases/20261114T213031Z-generic /opt/wisprno/current",
+      "systemctl restart wisprno"
+    ]
+  },
+  "recordedAt": "2026-11-14T21:35:59.405349+00:00"
+}

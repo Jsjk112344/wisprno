@@ -24,3 +24,7 @@ ui/loop/stories.json
 faultline-ui/compiled.css
 faultline-ui/compiled.js
 faultline-ui/dist/
+
+# Private companion/connection state from independent acceptance runs
+artifacts/plug-and-play/state/
+artifacts/plug-and-play/public/state/

@@ -1,0 +1,37 @@
+{
+  "runId": "c1e5b972-19f6-4b62-b1a2-d2c4e2fa82f5",
+  "done": true,
+  "regressionSaved": true,
+  "live": false,
+  "activeRunId": null,
+  "spend": {
+    "providers": [
+      {
+        "provider": "anthropic",
+        "capUsd": 3,
+        "reservedUsd": 0,
+        "remainingUsd": 3
+      },
+      {
+        "provider": "elevenlabs",
+        "capUsd": 0,
+        "reservedUsd": 0,
+        "remainingUsd": 0
+      },
+      {
+        "provider": "gemini",
+        "capUsd": 2,
+        "reservedUsd": 0.155364,
+        "remainingUsd": 1.844636
+      },
+      {
+        "provider": "openai",
+        "capUsd": 5,
+        "reservedUsd": 1.5408,
+        "remainingUsd": 3.4592
+      }
+    ],
+    "policy": "Conservative reservations; no automatic reset or refund. Not provider-account billing.",
+    "configured": true
+  }
+}

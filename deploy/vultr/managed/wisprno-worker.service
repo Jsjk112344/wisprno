@@ -1,0 +1,26 @@
+# Install only on a separate, explicitly approved execution host.
+# This unit does not provision a machine or install Docker/runsc.
+[Unit]
+Description=Wisprno isolated execution worker
+After=network.target
+
+[Service]
+User=wisprno-worker
+Group=wisprno-worker
+WorkingDirectory=/opt/wisprno-worker/current
+ExecStart=/opt/node/bin/node scripts/managed-worker.ts /etc/wisprno-worker/worker.json
+Restart=on-failure
+Environment=DOCKER_HOST=unix:///run/user/1001/docker.sock
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/var/lib/wisprno-worker /run/user/1001
+UMask=0077
+LimitNOFILE=1024
+TasksMax=256
+MemoryMax=1G
+CPUQuota=100%
+
+[Install]
+WantedBy=multi-user.target

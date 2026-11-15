@@ -1,0 +1,19 @@
+{
+  "duration": 226.054687,
+  "spokenSequence": [
+    3,
+    5,
+    6,
+    8,
+    9,
+    11,
+    12,
+    14
+  ],
+  "dialogueEnd": 129.21285800009537,
+  "narrationStarts": 135.035009292,
+  "audioPeakAfterDialogue": -91.0,
+  "captionRemoved": true,
+  "ending": "simple-results diagrams",
+  "sourceTranscriptUnchanged": true
+}

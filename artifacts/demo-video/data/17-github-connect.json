@@ -1,0 +1,9 @@
+{
+  "id": "17-github-connect",
+  "label": "1 · Connect GitHub and inspect source · demo animation",
+  "file": "clips/17-github-connect.mp4",
+  "duration": 17,
+  "route": "github-demo/index.html",
+  "mockAnimation": true,
+  "sourceReferences": "github-demo/source-references.json"
+}

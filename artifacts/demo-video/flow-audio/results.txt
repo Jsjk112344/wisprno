@@ -1,0 +1,1 @@
+The same attack breached nine of twenty trials before the check, and zero of twenty after. All twenty normal calls completed afterwards. This result applies to the tested attack and agent versions.

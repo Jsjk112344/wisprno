@@ -1,0 +1,1 @@
+This experiment tests a different card-lock attack. The fix makes the server require a verified one-time code before it can lock the card.

@@ -1,0 +1,45 @@
+{
+  "status": "Independent suite and public simulation acceptance passed; blind user connection remains",
+  "supportedBoundary": "docs/plug-and-play.md",
+  "checks": {
+    "backend": 120,
+    "ui": 8,
+    "browser": "browser.json",
+    "gateway": "Offline full transport with simulated upstream; actual reservation ledgers",
+    "tiger": "tiger.json: injected writer outage, recovery through durable queue, immutable bundle, real database query confirms exactly one simulation row after duplicate sync"
+  },
+  "deployed": {
+    "release": "20261115T025727Z-generic",
+    "rollback": "/opt/wisprno/releases/20261115T025447Z-generic",
+    "backup": "/root/wisprno-backups/20261115T025727Z-generic"
+  },
+  "recoveryCandidate": {
+    "hash": "6296ddd26786abf90d24864be739cce76e6b06f41766eb8c3aaa5537586fdeda",
+    "changes": [
+      "Read-only snapshot recovery alongside SSE",
+      "Durable private acceptance-browser state",
+      "Stop own unfinished fixtures on runner failure",
+      "Tokenless unauthenticated sessions complete the investigation without invented credentials",
+      "Unbound effects and incomplete authorization evidence are inconclusive"
+    ],
+    "verified": "Full browser workflow with SSE deliberately blocked; four sizes and 150% zoom"
+  },
+  "productionAcceptance": {
+    "status": "passed",
+    "run": "c1e5b972-19f6-4b62-b1a2-d2c4e2fa82f5",
+    "mode": "simulation",
+    "browser": "public/browser.json",
+    "reportLayout": "public/report-layout.json",
+    "persistence": "public/restart.json",
+    "tiger": "synced"
+  },
+  "heldOutSpecimen": "Untouched; blind connection not requested yet",
+  "paidSpendUsd": 0,
+  "remainingReservations": {
+    "OpenAI": 3.4592,
+    "Gemini": 1.844636,
+    "Anthropic": 3,
+    "ElevenLabs": 0
+  },
+  "harnessRequestsRemaining": 7
+}

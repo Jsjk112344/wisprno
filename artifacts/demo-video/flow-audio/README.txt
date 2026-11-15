@@ -1,0 +1,1 @@
+Exact transcript from prompt-round-01, agent greeting through caller turn 4. Local stock voices Daniel and Samantha. Synthetic narration of a recorded text experiment, not original SIP audio. Original events, tool effects, and verdicts are unchanged.

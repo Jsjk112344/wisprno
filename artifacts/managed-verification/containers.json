@@ -1,0 +1,69 @@
+{
+  "mode": "local-verification, runc; NOT public runsc isolation",
+  "productionChanged": false,
+  "paidCalls": 0,
+  "results": [
+    {
+      "language": "python",
+      "job": "1c5ed209-5867-46dd-b84c-1888e38d0e7b",
+      "run": "2cbced1a-484e-4d46-8dfc-2584cb674d12",
+      "state": "stopped",
+      "startupEvents": [
+        {
+          "at": "2026-11-15T01:08:35.258Z",
+          "stage": "queued",
+          "message": "Reviewed source staged; no dependency installation or model access."
+        },
+        {
+          "at": "2026-11-15T01:08:35.258Z",
+          "stage": "starting",
+          "message": "Starting the approved entry file in the pinned runtime."
+        },
+        {
+          "at": "2026-11-15T01:08:35.683Z",
+          "stage": "probing",
+          "message": "Checking the runtime bridge. A running process alone is not compatibility."
+        },
+        {
+          "at": "2026-11-15T01:08:36.682Z",
+          "stage": "ready",
+          "message": "Bridge responds. Continue source matching and disposable compatibility checks before testing."
+        }
+      ],
+      "fullScriptedWorkflow": true,
+      "containerLimitsVerified": true,
+      "modelRequests": 0
+    },
+    {
+      "language": "node",
+      "job": "29de6e92-7bfa-489b-bdf3-3fbe239005bc",
+      "run": "72a81492-0b87-4fce-82ae-c4d21b84f41b",
+      "state": "stopped",
+      "startupEvents": [
+        {
+          "at": "2026-11-15T01:09:29.313Z",
+          "stage": "queued",
+          "message": "Reviewed source staged; no dependency installation or model access."
+        },
+        {
+          "at": "2026-11-15T01:09:29.313Z",
+          "stage": "starting",
+          "message": "Starting the approved entry file in the pinned runtime."
+        },
+        {
+          "at": "2026-11-15T01:09:29.508Z",
+          "stage": "probing",
+          "message": "Checking the runtime bridge. A running process alone is not compatibility."
+        },
+        {
+          "at": "2026-11-15T01:09:30.559Z",
+          "stage": "ready",
+          "message": "Bridge responds. Continue source matching and disposable compatibility checks before testing."
+        }
+      ],
+      "fullScriptedWorkflow": true,
+      "containerLimitsVerified": true,
+      "modelRequests": 0
+    }
+  ]
+}

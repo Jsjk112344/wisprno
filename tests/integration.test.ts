@@ -1,3 +1,5 @@
+import { mockDirectory } from '../src/adapter/discovery.ts';
+import { pathToFileURL } from 'node:url';
 // End-to-end against the real voice_agent_mock server (in-process, loopback, scripted fake target model, no network).
 // Skipped when ../voice_agent_mock is not checked out next to this repo (e.g. in CI).
 import test from 'node:test';
@@ -12,7 +14,8 @@ import { FrozenSpeaker, type Speaker } from '../src/tester/agents.ts';
 import { baselineVersion } from '../src/runner/experiment.ts';
 import { SCENARIOS } from '../src/runner/cases.ts';
 
-const mockDir = new URL('../../voice_agent_mock/src/', import.meta.url);
+let mockDir = new URL('../../voice_agent_mock/src/', import.meta.url);
+try { mockDir = pathToFileURL(mockDirectory() + '/src/'); } catch { /* optional separate target */ }
 const available = existsSync(new URL('rules.mjs', mockDir));
 
 // A scripted stand-in for the target model: verifies the caller as Eleanor and changes her payout when asked.

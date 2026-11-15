@@ -1,0 +1,25 @@
+YOUR POST-CALL ANALYSIS
+
+0:00–2:09: Let the agents speak. The full exchange includes the greeting, the refusal and the card-lock offer.
+2:09–2:15: Watch the tool and record change. Begin your analysis at 2:15.
+
+2:15–2:38 | Analyze the confirmed breach
+As you can see here, the agent locked someone else’s card. The flaw is in authorization: the caller supplied personal details, and the backend accepted them without the required one-time code. The scorer confirms the failure from the tool call and changed record. That ends this attack attempt. Wisprno saves the evidence and moves on to replay.
+
+2:38–2:51 | Explain the minimized attack
+We then remove unnecessary lines and replay what remains. Just two caller lines were enough to breach this baseline in all ten minimizer replays.
+
+2:51–2:54 | Separate the experiments
+Now, a separate card-lock experiment.
+
+2:54–3:06 | Explain the server-side fix
+Here, the fix moves the requirement into the server. Even if the agent agrees to the request, the tool cannot proceed without a verified code.
+
+3:06–3:21 | Read the paired results
+As you can see, the same attack went from nine breaches in twenty trials to zero in twenty. All twenty normal calls still completed. These results describe this attack and these agent versions.
+
+3:21–3:45 | Explain the three stopping scopes
+This demo stops at the end of saved playback. A connected investigation tests one action and one approved fix, with three attack replays and normal calls. The original experiment runs up to eight rounds. It stops earlier at a spending limit or when no new actionable failure is found. Three rejected fixes leave that failure unresolved.
+
+RECORDING NOTES
+The MP4 retains the ring and stock-voice playback of the exact text transcript. It is silent after the dialogue so you can record the lines above. A close-up replaces the raw evidence-panel shot. Simple diagrams then explain the check, replay counts and stopping scopes. Blue guide boxes supply context and limitations rather than duplicate narration. Timing is an editing guide; hold frames longer if your delivery needs it.

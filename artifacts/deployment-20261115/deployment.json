@@ -1,0 +1,17 @@
+{
+  "verifiedAt": "2026-11-15T01:29:46.378773+00:00",
+  "url": "https://wisprno.us",
+  "release": "/opt/wisprno/releases/20261115T012914Z-generic",
+  "previousRelease": "/opt/wisprno/releases/20261115T012420Z-generic",
+  "preDeploymentRelease": "/opt/wisprno/releases/20261114T220618Z-generic",
+  "backup": "/root/wisprno-backups/20261115T012914Z-generic",
+  "checks": "npm run check: 103 backend and 7 UI tests passed; production build passed",
+  "httpsVerification": "artifacts/deployment-20261115/https-verification.json",
+  "legacyHistoryAndIndexRoutes": true,
+  "servicesActive": 7,
+  "paidCalls": 0,
+  "managedWorkerEnabled": false,
+  "managedWorkerBlocker": "No dedicated execution host; cloud provisioning not authorized. Hosted provider gateway not implemented.",
+  "heldOutSpecimenAccessed": false,
+  "spendMetadataUnchanged": true
+}

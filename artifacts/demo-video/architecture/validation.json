@@ -1,0 +1,53 @@
+{
+  "duration": 32,
+  "phases": [
+    {
+      "t": 0,
+      "vultr": "0",
+      "tiger": "0",
+      "followup": "0",
+      "caption": "A refusal is the next input to the tester."
+    },
+    {
+      "t": 8,
+      "vultr": "0",
+      "tiger": "0",
+      "followup": "0",
+      "caption": "A refusal is the next input to the tester."
+    },
+    {
+      "t": 12,
+      "vultr": "0",
+      "tiger": "0",
+      "followup": "0",
+      "caption": "The record proves the breach."
+    },
+    {
+      "t": 15,
+      "vultr": "0",
+      "tiger": "0",
+      "followup": "1",
+      "caption": "Keep the attack. Retest it when the agent changes."
+    },
+    {
+      "t": 18,
+      "vultr": "1",
+      "tiger": "0",
+      "followup": "1",
+      "caption": "Vultr is where developers run and review the tests."
+    },
+    {
+      "t": 26,
+      "vultr": "1",
+      "tiger": "1",
+      "followup": "0",
+      "caption": "Tiger Data shows whether each agent version is safer."
+    }
+  ],
+  "hostingSource": "deploy/vultr/README.md",
+  "tigerSources": [
+    "sql/tiger.sql",
+    "src/tiger/database.ts"
+  ],
+  "layout": "Reviewed at 1920x1080"
+}

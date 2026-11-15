@@ -1,0 +1,30 @@
+{
+  "mode": "scripted synthetic fixture; no model calls",
+  "downloadedCLI": true,
+  "hiddenCredentialPrompt": true,
+  "runUrl": "http://127.0.0.1:54242/analysis/run/9af328f3-d542-4e85-926e-645e92641d16",
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    }
+  ],
+  "errors": [],
+  "productionChanged": false
+}

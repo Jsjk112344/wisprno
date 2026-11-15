@@ -1,0 +1,9 @@
+{
+  "check": {
+    "removed": true,
+    "breach": true,
+    "overflow": false
+  },
+  "disclosure": "Spoken camera transition retained; on-screen labels removed at user request",
+  "audio": "Unchanged local stock voices and effects"
+}

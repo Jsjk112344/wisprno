@@ -1,3 +1,7 @@
+import {checkRunActive} from '../runner/control.ts';
+import {investigationScope} from '../spend/investigation.ts';
+import {reserveSpend} from '../spend/client.ts';
+import { reserveHarness } from './budget.ts';
 // Model provider interface for the harness's own agents (tester, caller, judge, fixer). Not the target's model.
 // Selected by config as "<provider>:<model>". No SDKs; plain fetch.
 import { SimModel } from '../sim/models.ts';
@@ -8,6 +12,7 @@ export interface ChatMessage {
 }
 
 export interface CompleteRequest {
+  purpose?: 'mapping';
   system: string;
   messages: ChatMessage[];
   /** Ask for a single JSON object in the reply. */
@@ -40,7 +45,12 @@ export class ProviderError extends Error {
   }
 }
 
-async function post(fetcher: Fetch, url: string, headers: Record<string, string>, body: unknown): Promise<any> {
+async function post(fetcher: Fetch, url: string, headers: Record<string, string>, body: any, model: string, mapping=false): Promise<any> {
+  checkRunActive();
+  investigationScope.getStore()?.reserve(model,Buffer.byteLength(JSON.stringify(body)),Number(body.max_completion_tokens??body.max_tokens??body.generationConfig?.maxOutputTokens));
+  reserveHarness(body,process.env,mapping);
+  await reserveSpend(model,body,Number(body.max_completion_tokens??body.max_tokens??body.generationConfig?.maxOutputTokens));
+  checkRunActive();
   let r: Response;
   try {
     r = await fetcher(url, { method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: JSON.stringify(body), signal: AbortSignal.timeout(120_000) });
@@ -72,7 +82,7 @@ export class OpenAIModel implements ChatModel {
     };
     if (req.temperature !== undefined) body.temperature = req.temperature;
     if (req.json) body.response_format = { type: 'json_object' };
-    const b = await post(this.fetcher, 'https://api.openai.com/v1/chat/completions', { Authorization: 'Bearer ' + this.key }, body);
+    const b = await post(this.fetcher, 'https://api.openai.com/v1/chat/completions', { Authorization: 'Bearer ' + this.key }, body, this.id);
     return { text: b.choices?.[0]?.message?.content ?? '', usage: { input: b.usage?.prompt_tokens ?? 0, output: b.usage?.completion_tokens ?? 0 } };
   }
 }
@@ -94,7 +104,7 @@ export class AnthropicModel implements ChatModel {
     // Current Claude models reject non-default sampling parameters and think by default (thinking counts toward
     // max_tokens), so no temperature is sent and the token ceiling leaves room for thinking.
     const body: Record<string, unknown> = { model: this.model, max_tokens: Math.max(4000, (req.maxTokens ?? 800) * 4), system, messages: req.messages };
-    const b = await post(this.fetcher, 'https://api.anthropic.com/v1/messages', { 'x-api-key': this.key, 'anthropic-version': '2023-06-01' }, body);
+    const b = await post(this.fetcher, 'https://api.anthropic.com/v1/messages', { 'x-api-key': this.key, 'anthropic-version': '2023-06-01' }, body, this.id);
     const text = (b.content ?? []).filter((c: any) => c.type === 'text').map((c: any) => c.text).join('');
     return { text, usage: { input: b.usage?.input_tokens ?? 0, output: b.usage?.output_tokens ?? 0 } };
   }
@@ -122,7 +132,7 @@ export class GeminiModel implements ChatModel {
       generationConfig,
     };
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(this.model)}:generateContent`;
-    const b = await post(this.fetcher, url, { 'x-goog-api-key': this.key }, body);
+    const b = await post(this.fetcher, url, { 'x-goog-api-key': this.key }, body, this.id, req.purpose==='mapping');
     const text = (b.candidates?.[0]?.content?.parts ?? []).map((p: any) => p.text ?? '').join('');
     return { text, usage: { input: b.usageMetadata?.promptTokenCount ?? 0, output: b.usageMetadata?.candidatesTokenCount ?? 0 } };
   }
@@ -149,6 +159,7 @@ export function modelFromSpec(spec: string | undefined, env: Record<string, stri
 /** Harness-side models may retry rate limits and server errors (they are not target turns). Logged by the caller. */
 export async function completeWithRetry(model: ChatModel, req: CompleteRequest, onRetry?: (e: ProviderError, n: number) => void, retries = 3): Promise<CompleteResult> {
   for (let n = 0; ; n++) {
+    checkRunActive();
     try {
       return await model.complete(req);
     } catch (e) {

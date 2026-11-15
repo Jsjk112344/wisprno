@@ -1,0 +1,4 @@
+Wisprno keeps probing. The tester reads each response, changes tactics, and tries another way in. The tool and record prove the breach. We shrink the attack, approve a fix, and retest. Vultr hosts the app and test engine, where developers run and review these tests. Tiger Data archives the call events and fixes. Its aggregates let us compare agent versions: did the breach return, and can normal callers still finish?
+
+EDITOR NOTE
+The social-engineering callout names attack dimensions. Voice modulation is planned, not a measured or implemented attack mode in this demo.

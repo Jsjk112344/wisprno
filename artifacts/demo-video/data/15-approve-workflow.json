@@ -1,0 +1,9 @@
+{
+  "id": "15-approve-workflow",
+  "label": "Workflow demonstration · simulated models · no measured claim",
+  "file": "clips/15-approve-workflow.mp4",
+  "duration": 12.035074458999997,
+  "route": "/analysis/run/6c07d293-f852-4c88-8fe7-90d2cc6f1646",
+  "runId": "6c07d293-f852-4c88-8fe7-90d2cc6f1646",
+  "simulation": true
+}

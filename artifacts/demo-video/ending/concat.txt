@@ -1,0 +1,8 @@
+file '/Users/justin/Desktop/Projects/hackumass/umass_agent_arena/artifacts/demo-video/ending/stop.mp4'
+file '/Users/justin/Desktop/Projects/hackumass/umass_agent_arena/artifacts/demo-video/ending/wilson.mp4'
+file '/Users/justin/Desktop/Projects/hackumass/umass_agent_arena/artifacts/demo-video/ending/developer.mp4'
+file '/Users/justin/Desktop/Projects/hackumass/umass_agent_arena/artifacts/demo-video/ending/tiger.mp4'
+file '/Users/justin/Desktop/Projects/hackumass/umass_agent_arena/artifacts/demo-video/ending/sync.mp4'
+file '/Users/justin/Desktop/Projects/hackumass/umass_agent_arena/artifacts/demo-video/ending/vultr.mp4'
+file '/Users/justin/Desktop/Projects/hackumass/umass_agent_arena/artifacts/demo-video/ending/budget.mp4'
+file '/Users/justin/Desktop/Projects/hackumass/umass_agent_arena/artifacts/demo-video/ending/close.mp4'

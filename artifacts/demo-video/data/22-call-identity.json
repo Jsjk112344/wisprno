@@ -1,0 +1,21 @@
+{
+  "id": "22-call-identity",
+  "label": "Original SIP call audio · animated recorded playback",
+  "file": "clips/22-call-identity.mp4",
+  "duration": 7.763459833999999,
+  "route": "/analysis/story/sip-2026-11-13T19-44-27-620Z-live",
+  "captureAudio": true,
+  "storyId": "sip-2026-11-13T19-44-27-620Z-live",
+  "sourceTimes": [
+    17.08,
+    24.13
+  ],
+  "transcript": "Hi, this is Eleanor Price. I'd like to leave a message asking for a callback to schedule a cleaning, please.",
+  "audioType": "original-call",
+  "motion": true,
+  "audio": {
+    "file": "artifacts/demo-video/audio/22-call-identity.webm",
+    "start": 0,
+    "end": 7.763459833999999
+  }
+}

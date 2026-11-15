@@ -1,0 +1,50 @@
+{
+  "checks": [
+    {
+      "scene": "stop",
+      "overflow": false
+    },
+    {
+      "scene": "wilson",
+      "overflow": false
+    },
+    {
+      "scene": "developer",
+      "overflow": false
+    },
+    {
+      "scene": "tiger",
+      "overflow": false
+    },
+    {
+      "scene": "sync",
+      "overflow": false
+    },
+    {
+      "scene": "vultr",
+      "overflow": false
+    },
+    {
+      "scene": "budget",
+      "overflow": false
+    },
+    {
+      "scene": "close",
+      "overflow": false
+    }
+  ],
+  "duration": 84,
+  "audio": "Silent for user voiceover",
+  "scope": "Connected investigation only",
+  "sources": [
+    "src/loop/generic-lifecycle.ts",
+    "sql/tiger.sql",
+    "src/tiger/database.ts",
+    "deploy/vultr/README.md",
+    "deploy/vultr/verification.json",
+    "src/tiger/investigations.ts"
+  ],
+  "exportSeconds": 84.021354,
+  "wilsonUpperPercent": 16.1,
+  "historicalEventCount": 64620
+}

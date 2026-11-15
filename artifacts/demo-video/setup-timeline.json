@@ -1,0 +1,99 @@
+{
+  "title": "Wisprno setup",
+  "notes": [
+    "Step 1 is the disclosed GitHub animation. Steps 2 and 3 are captures of the actual platform UI.",
+    "No investigation or paid model call is started."
+  ],
+  "scenes": [
+    {
+      "id": "17-github-connect",
+      "kind": "voiceover",
+      "duration": 17,
+      "title": "Connect a GitHub repository",
+      "text": "Here’s a preview of the GitHub connection flow. Choose a repository and branch, then review the source files. This demo uses our local mock agent’s actual code.",
+      "note": "Connection is mocked · no GitHub request",
+      "capture": {
+        "id": "17-github-connect",
+        "label": "1 · Connect GitHub and inspect source · demo animation",
+        "file": "clips/17-github-connect.mp4",
+        "duration": 17,
+        "route": "github-demo/index.html",
+        "mockAnimation": true,
+        "sourceReferences": "github-demo/source-references.json"
+      },
+      "direction": "Read as voiceover.",
+      "start": 0,
+      "end": 17
+    },
+    {
+      "id": "18-repo-mapping",
+      "kind": "voiceover",
+      "duration": 14,
+      "title": "Watch the repository become a map",
+      "text": "The source becomes a map of tools and the records they can change. Select card lock to inspect its source and available check. Testing tells us whether that check holds.",
+      "note": "Source relationships are interpretations · runtime enforcement untested",
+      "capture": {
+        "id": "18-repo-mapping",
+        "label": "1 · Connect GitHub and inspect source · demo animation",
+        "file": "clips/18-repo-mapping.mp4",
+        "duration": 14,
+        "route": "github-demo/index.html",
+        "mockAnimation": true,
+        "sourceReferences": "github-demo/source-references.json"
+      },
+      "direction": "Read as voiceover.",
+      "start": 17,
+      "end": 31
+    },
+    {
+      "id": "19-agent-profile",
+      "kind": "voiceover",
+      "duration": 13.029186249999999,
+      "title": "Name your agent and set its personality",
+      "text": "Now, in the actual platform, name your agent and choose its conversation style. I’ll call this one Pioneer and select calm and precise.",
+      "note": "",
+      "capture": {
+        "id": "19-agent-profile",
+        "label": "2 · Name your agent · actual platform UI",
+        "file": "clips/19-agent-profile.mp4",
+        "duration": 13.029186249999999,
+        "route": "/new?step=target",
+        "actualPlatform": true,
+        "configuration": {
+          "target": "Pioneer",
+          "style": "Calm & precise"
+        },
+        "noRunStarted": true
+      },
+      "direction": "Read as voiceover.",
+      "start": 31,
+      "end": 44.029186249999995
+    },
+    {
+      "id": "20-redteam-selection",
+      "kind": "voiceover",
+      "duration": 15.073647458000003,
+      "title": "Select a red-team agent",
+      "text": "Next, choose the permission and the caller who will test it. Here I select card status and Jules, whose tactic is urgency. The setup is ready to start an investigation.",
+      "note": "",
+      "capture": {
+        "id": "20-redteam-selection",
+        "label": "3 · Select a red-team agent · actual platform UI",
+        "file": "clips/20-redteam-selection.mp4",
+        "duration": 15.073647458000003,
+        "route": "/new?step=select",
+        "actualPlatform": true,
+        "configuration": {
+          "target": "Pioneer",
+          "style": "Calm & precise",
+          "attacker": "jules",
+          "caseId": "lost_card"
+        },
+        "noRunStarted": true
+      },
+      "direction": "Read as voiceover.",
+      "start": 44.029186249999995,
+      "end": 59.102833708
+    }
+  ]
+}

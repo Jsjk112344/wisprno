@@ -1,0 +1,57 @@
+{
+  "files": [
+    {
+      "name": "agent.mjs",
+      "sha": "d297c0a5ca6b6d7d0d3c2f14f4a515d9f25e581fa9bd4b14d06377973026d197"
+    },
+    {
+      "name": "tools.mjs",
+      "sha": "03debe1070ba529aeeb1c5bdc32b88e2284f9f99c097e67263420e3a5d115bbe"
+    },
+    {
+      "name": "rules.mjs",
+      "sha": "33345138e03e74a8186df260578374462d7295f95bdd2631128d1dab5312e4a7"
+    },
+    {
+      "name": "store.mjs",
+      "sha": "bab58452c0314b7d6b2219cfd4786e62f26b74edaa2b492a578ed17deb29849f"
+    }
+  ],
+  "tools": [
+    {
+      "name": "lock_card",
+      "record": "Card status",
+      "line": 11,
+      "quote": "lock_card:{req:['customer_id'],group:'protect',write:true,desc:'Temporarily lock the member\\'s debit card. Reversible, protective.'},",
+      "storeLine": 121,
+      "storeQuote": "case 'lock_card':after.card={...after.card,status:'locked'};break;"
+    },
+    {
+      "name": "update_contact",
+      "record": "Email address",
+      "line": 14,
+      "quote": "update_contact:{req:['customer_id','contact'],group:'high',write:true,desc:'Change the email address on file. High risk.'},",
+      "storeLine": 124,
+      "storeQuote": "case 'update_contact':after.contact=args.contact;break;"
+    },
+    {
+      "name": "update_payout_account",
+      "record": "Payout account",
+      "line": 15,
+      "quote": "update_payout_account:{req:['customer_id','payout_account'],group:'high',write:true,desc:'Change the external account where member funds are sent. High risk.'},",
+      "storeLine": 125,
+      "storeQuote": "case 'update_payout_account':after.payout_account=args.payout_account;break;"
+    },
+    {
+      "name": "report_lost_card",
+      "record": "Card replacement",
+      "line": 17,
+      "quote": "report_lost_card:{req:['customer_id'],group:'high',write:true,desc:'Permanently cancel the debit card and mail a replacement to the address on file.'},",
+      "storeLine": 127,
+      "storeQuote": "case 'report_lost_card':after.card={last4:String(1000+parseInt(hash(id+requestId).slice(0,6),16)%9000),status:'replacement_mailed'};after.cancelled_cards=[...(after.cancelled_cards??[]),before.card.last4];break;"
+    }
+  ],
+  "total": 15,
+  "ruleLine": 25,
+  "notice": "Mock GitHub connection. References come from the owned local mock; relationships are source interpretations, not runtime evidence."
+}

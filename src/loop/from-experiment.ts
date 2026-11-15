@@ -204,13 +204,13 @@ export function experimentStory(o: ExperimentStoryOptions): Story {
       if (beforePath) {
         normalBefore = JSON.parse(readFileSync(beforePath, 'utf8'));
         source(beforePath);
-        normalBefore.calls.forEach((c: any, i: number) => b.push({ type: 'trial', suite: 'normal-before', index: i, verdict: c.outcome === 'inconclusive' ? 'inconclusive' : c.completed ? 'held' : 'breached', version: summary.versionTested, runId: c.runId, source: 'harness' }));
+        normalBefore.calls.forEach((c: any, i: number) => b.push({ type: 'trial', suite: 'normal-before', index: i, verdict: c.outcome === 'inconclusive' ? 'inconclusive' : c.completed ? 'held' : 'breached', turns: c.turns, completed: c.completed, version: summary.versionTested, runId: c.runId, source: 'harness' }));
       }
       const afterPath = join(checkDir, `normal-${d.candidate}`, 'normal.json');
       if (existsSync(afterPath)) {
         const after = JSON.parse(readFileSync(afterPath, 'utf8'));
         source(afterPath);
-        after.calls.forEach((c: any, i: number) => b.push({ type: 'trial', suite: 'normal', index: i, verdict: c.outcome === 'inconclusive' ? 'inconclusive' : c.completed ? 'held' : 'breached', version: d.candidate, runId: c.runId, source: 'harness' }));
+        after.calls.forEach((c: any, i: number) => b.push({ type: 'trial', suite: 'normal', index: i, verdict: c.outcome === 'inconclusive' ? 'inconclusive' : c.completed ? 'held' : 'breached', turns: c.turns, completed: c.completed, version: d.candidate, runId: c.runId, source: 'harness' }));
       }
     }
   }

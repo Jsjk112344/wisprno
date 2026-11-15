@@ -1,0 +1,19 @@
+[Unit]
+Description=Wisprno persistent provider spend reservations
+After=network.target
+[Service]
+User=wisprno-spend
+Group=wisprno-spend
+WorkingDirectory=/opt/wisprno/current
+EnvironmentFile=/etc/wisprno/spend.env
+ExecStart=/opt/node/bin/node src/spend/server.ts
+Restart=on-failure
+RestartSec=3
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/wisprno-spend
+[Install]
+WantedBy=multi-user.target

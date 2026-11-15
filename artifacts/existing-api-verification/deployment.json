@@ -1,0 +1,14 @@
+{
+  "release": "20261115T014337Z-generic",
+  "previous": "20261115T012914Z-generic",
+  "tests": {
+    "backend": 105,
+    "ui": 7,
+    "failed": 0
+  },
+  "browser": "Independent existing-API fixture, no bridge endpoint, empty access key, connection and map passed",
+  "paidCalls": 0,
+  "repositoryEditsRequired": false,
+  "heldOutAccessed": false,
+  "limitation": "Existing-API full investigation is not implemented; launch is blocked pending Wisprno adapter capabilities. Native full workflow remains available."
+}

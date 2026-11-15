@@ -1,0 +1,18 @@
+{
+  "id": "13-sip-response",
+  "label": "Recorded SIP call · our own test line · synthetic data",
+  "file": "clips/13-sip-response.mp4",
+  "duration": 6.047211667,
+  "route": "/analysis/story/sip-2026-11-13T19-44-27-620Z-live",
+  "storyId": "sip-2026-11-13T19-44-27-620Z-live",
+  "sourceTimes": [
+    68.42,
+    74.4
+  ],
+  "audio": {
+    "file": "results/sip/2026-11-13T19-44-27-620Z-live/call-clean.mp3",
+    "start": 68.42,
+    "end": 74.4
+  },
+  "transcript": "Your message has been recorded, and someone will call you back to schedule your cleaning. If you need anything else, just let me know."
+}

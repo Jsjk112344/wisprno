@@ -1,0 +1,95 @@
+{
+  "url": "https://wisprno.us/",
+  "downloadedCompanion": true,
+  "httpsPairing": true,
+  "sourceValidation": true,
+  "disposableChecks": true,
+  "dynamicMap": true,
+  "otherBrowserRejected": true,
+  "pairingRevoked": true,
+  "managedExecutionEnabled": false,
+  "paidCalls": 0,
+  "errors": [],
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    }
+  ],
+  "budgetBefore": {
+    "providers": [
+      {
+        "provider": "anthropic",
+        "capUsd": 3,
+        "reservedUsd": 0,
+        "remainingUsd": 3
+      },
+      {
+        "provider": "elevenlabs",
+        "capUsd": 0,
+        "reservedUsd": 0,
+        "remainingUsd": 0
+      },
+      {
+        "provider": "gemini",
+        "capUsd": 2,
+        "reservedUsd": 0.155364,
+        "remainingUsd": 1.844636
+      },
+      {
+        "provider": "openai",
+        "capUsd": 5,
+        "reservedUsd": 1.5408,
+        "remainingUsd": 3.4592
+      }
+    ],
+    "policy": "Conservative reservations; no automatic reset or refund. Not provider-account billing.",
+    "configured": true
+  },
+  "budgetAfter": {
+    "providers": [
+      {
+        "provider": "anthropic",
+        "capUsd": 3,
+        "reservedUsd": 0,
+        "remainingUsd": 3
+      },
+      {
+        "provider": "elevenlabs",
+        "capUsd": 0,
+        "reservedUsd": 0,
+        "remainingUsd": 0
+      },
+      {
+        "provider": "gemini",
+        "capUsd": 2,
+        "reservedUsd": 0.155364,
+        "remainingUsd": 1.844636
+      },
+      {
+        "provider": "openai",
+        "capUsd": 5,
+        "reservedUsd": 1.5408,
+        "remainingUsd": 3.4592
+      }
+    ],
+    "policy": "Conservative reservations; no automatic reset or refund. Not provider-account billing.",
+    "configured": true
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "25-call-response",
+  "label": "Original SIP call audio · animated recorded playback",
+  "file": "clips/25-call-response.mp4",
+  "duration": 6.742885375,
+  "route": "/analysis/story/sip-2026-11-13T19-44-27-620Z-live",
+  "captureAudio": true,
+  "storyId": "sip-2026-11-13T19-44-27-620Z-live",
+  "sourceTimes": [
+    68.42,
+    74.4
+  ],
+  "transcript": "Your message has been recorded, and someone will call you back to schedule your cleaning. If you need anything else, just let me know.",
+  "audioType": "original-call",
+  "motion": true,
+  "audio": {
+    "file": "artifacts/demo-video/audio/25-call-response.webm",
+    "start": 0,
+    "end": 6.742885375
+  }
+}

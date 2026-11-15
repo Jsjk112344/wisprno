@@ -1,8 +1,10 @@
-# Wisprno
+# WisprNo
 
 Site: [wisprno.us](https://wisprno.us).
 
-Wisprno is a test harness for voice agents. It plays simulated callers against an agent, reads the agent's backend
+Brand: the [WisprNo brand kit](WisprNo-Brand-Kit/README.md) supplies the vector logos and plum, lilac, and lime palette. UI assets live in `ui/brand/`.
+
+WisprNo is a test harness for voice agents. It plays simulated callers against an agent, reads the agent's backend
 record of what actually happened (tool calls, verdicts, account state before and after), and decides from that
 record, not from what the agent says, whether the agent broke its own rules. When it finds a failure it shrinks it to
 the shortest call that still fails, asks a fixer agent for a fix, and checks that the fix holds without hurting
@@ -43,7 +45,7 @@ cp .env.example .env   # then fill in keys and the mock's admin token yourself
    read and version stamp). Configure its own `.env` (`ADMIN_TOKEN`, `ENABLE_PROVIDER=true`, `OPENAI_API_KEY`,
    `CHAT_MODEL`, and a `MAX_PROVIDER_REQUESTS` large enough for the run), then `npm start`.
 2. In this repo's `.env`, set `TARGET_URL` (default `http://127.0.0.1:4310`) and `TARGET_ADMIN_TOKEN` to the mock's
-   admin token. Wisprno never reads the mock's `.env`.
+   admin token. WisprNo never reads the mock's `.env`.
 3. Check the connection: `npm run faultline -- health`.
 
 ## Dry run (no API spend)
@@ -79,6 +81,7 @@ assumptions.
 ```bash
 npm run ui:install                     # install the supplied frontend dependencies
 npm run ui:start                       # build + start simulation at http://127.0.0.1:4321/ ($0)
+npm run ui:live                        # real-model mode at http://127.0.0.1:4323/; requires the separate target
 ```
 
 Connect the local repository, inspect discovered tools, configure the target and caller, and run an attack. The UI
@@ -95,7 +98,19 @@ See [faultline-ui/README.md](faultline-ui/README.md) for the connected workflow 
 
 ## Safety
 
-- Synthetic data only. The mock binds to 127.0.0.1 and rejects browser origins; Wisprno calls it from this backend
+- Synthetic data only. The mock binds to 127.0.0.1 and rejects browser origins; WisprNo calls it from this backend
   process.
 - Secrets live only in `.env` (git-ignored). Tests and CI run without secrets or network access.
-- Every provider error marks the session inconclusive; Wisprno never silently retries a paid turn.
+- Every provider error marks the session inconclusive; WisprNo never silently retries a paid turn.
+
+### Observing a new real-model outcome
+
+`ui:start` and `ui:sim` use scripted models. `ui:live` starts the UI without `--sim`; starting this server alone does not call a model. Start your separately deployed `voice_agent_mock` with its provider enabled, then check `npm run faultline -- health`. Configure the target in its own environment; this repository never reads that environment file. The synthetic accounts and real tool/backend evidence should remain in place for real-model tests.
+
+Open port 4323, connect the local repository, choose a permission and attacker, and review the model-spend authorization before launching. The full UI investigation can include multiple attacks, minimization, replays, fixes, and normal calls; it is not one API request. The target-request cap is not a dollar cap or a total cap on all harness model calls. A blocked or inconclusive attempt is a valid observed outcome; a breach must have correlated backend evidence.
+
+Historical Tiger results and recorded playback are distinct from a newly executed test. New UI investigations currently remain in local run archives and are not automatically ingested into Tiger's experiment comparison.
+
+### Managed-startup preview (worker not enabled)
+
+The new **Let Wisprno start it** path launches reviewed source on a separate execution worker. Local Python and Node container fixtures complete the existing scripted investigation workflow. Public mode requires a dedicated rootless runsc worker; public isolation and hosted real-model access remain unverified/unimplemented respectively. See [managed execution](docs/managed-execution.md) for the exact boundary and activation prerequisites. The application and companion are deployed at https://wisprno.us; no new Vultr resources were created. Managed execution remains disabled until a separate worker is available. The companion and direct connection paths remain available.

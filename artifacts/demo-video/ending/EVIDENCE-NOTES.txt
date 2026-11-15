@@ -1,0 +1,7 @@
+Wilson example: 0 breaches in 20 trials. Using z=1.96 gives an upper 95% bound of 16.1%. This is not a claim of zero risk.
+
+64,620 is the historical experiment event count in deploy/vultr/verification.json, not a live count of every current investigation.
+
+Historical experiment events and fix attempts use the SQL archive/aggregate. New investigation bundles sync separately to ui_investigations with execution mode and content hash. The ending uses separate scenes for those paths.
+
+Vultr isolation and fail-closed reservation controls are described in deploy/vultr/README.md. No cloud changes or paid calls were made for this video.

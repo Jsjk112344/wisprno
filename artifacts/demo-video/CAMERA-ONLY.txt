@@ -1,0 +1,15 @@
+A2-introduce — Introduce Wisprno
+That opening was an illustration, with synthetic voices. Wisprno tests whether your agent can be talked into an action like that. Let’s connect an agent and test its sensitive permissions.
+[Look into the lens. Identify the opening as an illustration, then cut to the platform setup.]
+
+A3-text-boundary — Introduce the experiment
+Now let’s look at a recorded experiment. These tests use text conversations with real models. This is where our replay numbers come from.
+[Keep the phrase “text conversations” clear. Cut to the historical investigation.]
+
+A4-fix — A fix has two jobs
+Finding a breach is half the job. A fix has to stop the attack and still let legitimate callers finish.
+[Slightly tighter framing. Pause before “still let legitimate callers finish”.]
+
+A5-close — The close
+Before granting a sensitive permission, test the breaking call and prove the fix holds. Wisprno. Break your agent and fix it before someone else does.
+[Look directly into the lens. Hold after the last word. Leave space for the end card.]

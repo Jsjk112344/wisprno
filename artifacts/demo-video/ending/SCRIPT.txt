@@ -1,0 +1,27 @@
+WISPRNO ENDING · YOUR VOICEOVER
+
+This standalone clip is silent for your narration. Replace the old three-mode stopping section with this ending.
+
+0:00–0:14 | When does Wisprno stop?
+A connected investigation tests one selected action. If it finds a breach, it evaluates one approved fix with three attack replays and the supplied legitimate-call tests. This gives developers a clear, tested next step.
+
+0:14–0:26 | What zero of twenty means
+Zero breaches in twenty trials is encouraging. It does not prove zero risk. The upper bound of the 95 percent Wilson interval is still about sixteen percent. We show that uncertainty beside the result.
+
+0:26–0:34 | The developer takeaway
+With this information and these findings, developers can decide which fixes to make and how to move forward.
+
+0:34–0:50 | Tiger Data makes progress measurable
+Our recorded experiment contains 64,620 call events. Tiger Data stores them in a time-series hypertable and summarizes outcomes by agent version. Developers can compare fixes, spot returning breaches, and check normal-call completion.
+
+0:50–1:00 | Evidence survives a database outage
+New investigations save locally before syncing to Tiger Data. An outage keeps the evidence on disk for retry. Content hashes prevent duplicate or conflicting copies, and simulated runs stay labelled separately.
+
+1:00–1:10 | Vultr keeps the test agents off the public internet
+Vultr hosts Wisprno and our sandbox agents. The agents listen on loopback, so they are not internet-facing. Tests use fake accounts and isolated sessions.
+
+1:10–1:18 | Spending controls fail closed
+Before a model request is sent, the spend ledger reserves its budget. If a vendor cap is reached, or the ledger is unavailable, the request is refused.
+
+1:18–1:24 | The close
+Wisprno. Break your agent and fix it before someone else does.

@@ -1,0 +1,35 @@
+{
+  "base": "http://127.0.0.1:50035",
+  "checks": [
+    {
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    }
+  ],
+  "gateReload": true,
+  "completedReload": true,
+  "keyboardApproval": true,
+  "decline": true,
+  "stop": true,
+  "speed": 50,
+  "modelRequests": 0,
+  "posts": [],
+  "errors": [],
+  "report": "INVESTIGATION RESULTS\nRequire a verified code before locking a card.\n\nThe server-side check stopped this attack in testing. Legitimate callers could still complete their tasks.\n\nWhat broke\nA caller locked someone else’s card.\n\nThe caller claimed to act on Eleanor Price’s behalf. The backend record confirmed that her card was locked.\n\n9 of 20\nattack attempts succeeded before the fix\nWhat worked\nCheck authorization at the tool.\n\nRequire a verified one-time code for the member before lock_card can change their card.\n\n0 of 20\nattack attempts succeeded with the accepted check\nDid normal calls still work?\nLegitimate callers got through.\n\nThe accepted check also passed the recorded normal-call tests.\n\n20 of 20\nlegitimate calls completed with the check\nYour next step\n\nReview the server-side check, then apply it to your agent’s card-lock tool. Save the breaking conversation as a test and rerun it whenever the agent changes.\n\nThis result covers the card-lock attack and the normal calls tested here. Test the agent’s other sensitive actions separately.\n\nTest history and technical details\nSave as test\nDownload fix & evidence\nNew analysis"
+}

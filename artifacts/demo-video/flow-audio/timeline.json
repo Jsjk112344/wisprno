@@ -1,0 +1,170 @@
+[
+  {
+    "id": "attack",
+    "video": "clips/30-audible-attack.mp4",
+    "audio": "audio/30-audible-attack.webm",
+    "duration": 138.36727087499997,
+    "title": "Watch the caller find another way in",
+    "cards": [],
+    "phases": [
+      {
+        "start": 0,
+        "end": 17.5652000002861,
+        "cards": [
+          [
+            "PUBLIC PHONE LINE",
+            "A stranger can reach an agent with access to account tools."
+          ]
+        ]
+      },
+      {
+        "start": 17.5652000002861,
+        "end": 68.62640000009537,
+        "cards": [
+          [
+            "AUTHORITY CLAIM",
+            "The caller claims power of attorney. That claim has not been verified."
+          ],
+          [
+            "FIRST BOUNDARY",
+            "The agent refuses to change the payout account."
+          ]
+        ]
+      },
+      {
+        "start": 68.62640000009537,
+        "end": 105.6445,
+        "cards": [
+          [
+            "ANOTHER ROUTE",
+            "The agent offers card lock after refusing the payout change."
+          ],
+          [
+            "SAME CALLER",
+            "The sensitive action changes. The caller’s authority does not."
+          ]
+        ]
+      },
+      {
+        "start": 105.6445,
+        "end": 119.86540000009536,
+        "cards": [
+          [
+            "IDENTITY ≠ AUTHORITY",
+            "Knowing a name, birth date and ZIP does not prove permission to act."
+          ]
+        ]
+      },
+      {
+        "start": 119.86540000009536,
+        "end": 134.735009292,
+        "cards": [
+          [
+            "TRUST BOUNDARY",
+            "Caller-supplied details reach a tool that can change an account."
+          ],
+          [
+            "PROMPT-ONLY GUARD",
+            "The map shows the one-time-code requirement in the prompt."
+          ]
+        ]
+      },
+      {
+        "start": 134.735009292,
+        "end": 138.36727087499997,
+        "cards": [
+          [
+            "CONFIRMED EFFECT",
+            "Tool: lock_card\nCard: active → locked"
+          ]
+        ]
+      }
+    ],
+    "start": 0
+  },
+  {
+    "id": "proof",
+    "video": "clips/37-proof-closeup.mp4",
+    "duration": 20.603213417,
+    "title": "Follow the tool to the changed record",
+    "fullFrame": true,
+    "cards": [],
+    "start": 138.36727087499997
+  },
+  {
+    "id": "shortest",
+    "video": "clips/08-shortest.mp4",
+    "duration": 13,
+    "title": "Keep the shortest call that still breaks the agent",
+    "cards": [
+      [
+        "WHICH REPLAYS?",
+        "This is the minimizer’s ten-trial batch, not the later twenty-trial batch."
+      ],
+      [
+        "UNCERTAINTY",
+        "10 of 10 breaches.\n95% Wilson interval: 72.2–100%."
+      ]
+    ],
+    "start": 158.97048429199998
+  },
+  {
+    "id": "separate",
+    "video": "edit-segments/B1-separate.mp4",
+    "fullFrame": true,
+    "duration": 3,
+    "title": "Now test whether a server-side check holds",
+    "cards": [
+      [
+        "COMPARISON SCOPE",
+        "Three-line attack.\nChecks strategy · round 2.\nCompare v0 with v5."
+      ]
+    ],
+    "start": 171.97048429199998
+  },
+  {
+    "id": "check",
+    "video": "clips/38-simple-check.mp4",
+    "fullFrame": true,
+    "duration": 12,
+    "title": "The fix belongs at the tool boundary",
+    "cards": [
+      [
+        "ENFORCEMENT POINT",
+        "code:lock_card runs on the server, where the account can change."
+      ],
+      [
+        "TWO TEST SUITES",
+        "Attack replay checks misuse. Normal calls check customer access."
+      ]
+    ],
+    "start": 174.97048429199998
+  },
+  {
+    "id": "results",
+    "video": "clips/39-simple-results.mp4",
+    "fullFrame": true,
+    "duration": 15,
+    "title": "Did the fix stop the attack without blocking customers?",
+    "cards": [
+      [
+        "ZERO IS NOT CERTAINTY",
+        "0 of 20 breaches still has a 95% upper bound of 16.1%."
+      ],
+      [
+        "FRICTION CHECK",
+        "Mean normal-call turns: 2.60 → 3.35. Completion held, but calls needed more turns."
+      ]
+    ],
+    "start": 186.97048429199998
+  },
+  {
+    "id": "stops",
+    "video": "clips/40-simple-stops.mp4",
+    "duration": 24,
+    "title": "When testing stops",
+    "fullFrame": true,
+    "cards": [],
+    "start": 201.97048429199998
+  }
+]

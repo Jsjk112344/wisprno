@@ -1,0 +1,9 @@
+{
+  "id": "18-repo-mapping",
+  "label": "1 · Connect GitHub and inspect source · demo animation",
+  "file": "clips/18-repo-mapping.mp4",
+  "duration": 14,
+  "route": "github-demo/index.html",
+  "mockAnimation": true,
+  "sourceReferences": "github-demo/source-references.json"
+}

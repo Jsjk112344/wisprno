@@ -1,0 +1,126 @@
+[
+  {
+    "storyId": "prompt-round-01",
+    "version": {
+      "before": "v0",
+      "model": "gpt-4.1-mini",
+      "promptHash": "7cc36ad73d4b"
+    },
+    "transport": "text",
+    "tier": "backend-record",
+    "sources": [
+      {
+        "path": "results/summary/prompt/round-01.json",
+        "sha256": "e5df4f3f8611bf8b8b5c55fb32ee01077fb0fd96c2580d5edfce3d36c19ae995",
+        "verified": true
+      },
+      {
+        "path": "results/raw/prompt/round-01/test/payout_change/events/a2167324-1e06-4c22-bbcb-1dba12ce2559.jsonl",
+        "sha256": "3c0fff74a8f46be4cf73c352204f689561083f0db96a4f2639cf48a6a7213a81",
+        "verified": true
+      },
+      {
+        "path": "results/raw/prompt/round-01/test/payout_change/evidence/a2167324-1e06-4c22-bbcb-1dba12ce2559.json",
+        "sha256": "4b5cf4edf5b2cb84323f9304f09119bbe9c553f0a0911da007ab9f3a8bd16ca1",
+        "verified": true
+      }
+    ]
+  },
+  {
+    "storyId": "checks-round-02",
+    "version": {
+      "before": "v0",
+      "after": "v5",
+      "model": "gpt-4.1-mini",
+      "promptHash": "7cc36ad73d4b"
+    },
+    "transport": "text",
+    "tier": "backend-record",
+    "sources": [
+      {
+        "path": "results/summary/checks/round-02.json",
+        "sha256": "a652e4faa6d34efe135f3efe6a25d8961b283198785abc8b676d936ba0ca8ca5",
+        "verified": true
+      },
+      {
+        "path": "results/raw/checks/round-02/test/lost_card/events/af835955-bff9-4587-9af3-8a0ff46d4f1b.jsonl",
+        "sha256": "67f08d80f9ecd456a4f613cc1c74f6505fcbe14c05f744c2b3db9a57f0d414d1",
+        "verified": true
+      },
+      {
+        "path": "results/raw/checks/round-02/test/lost_card/evidence/af835955-bff9-4587-9af3-8a0ff46d4f1b.json",
+        "sha256": "5b6aac3a40046a98c76717cac72482e0fb24dd8b292013dce20a1d93cc987fda",
+        "verified": true
+      },
+      {
+        "path": "results/raw/checks/round-01/normal-v0/normal.json",
+        "sha256": "b53460690e427f3022981101d96dc73cecd4a3a273bb21e86d337965cfc5d974",
+        "verified": true
+      },
+      {
+        "path": "results/raw/checks/round-02/check-v5/normal-v5/normal.json",
+        "sha256": "939f6431eb5d637a8b9456cba3c46311db6cbf0eafc2359ac8ca68b77692b0e8",
+        "verified": true
+      }
+    ]
+  },
+  {
+    "storyId": "sip-2026-11-13T19-44-27-620Z-live",
+    "version": {
+      "before": "aireceptionist config e0e9fd9c3df2",
+      "model": "gpt-realtime-2.1",
+      "promptHash": "309d0d37ba5b"
+    },
+    "transport": "sip",
+    "tier": "tool-call-artifact",
+    "sources": [
+      {
+        "path": "results/sip/2026-11-13T19-44-27-620Z-live/events.jsonl",
+        "sha256": "89132bcd4bffe950c0fd43b6cf191749b127a13a43916a66b833f59ae27b4a85",
+        "verified": true
+      },
+      {
+        "path": "results/sip/2026-11-13T19-44-27-620Z-live/summary.json",
+        "sha256": "4769a1f2e10acf160f1141828d6fdccdbdb4e11a4918af8c426abb8e5233ccb5",
+        "verified": true
+      },
+      {
+        "path": "/Users/justin/.local/share/faultline/deployments/AIReceptionist/faultline-runtime/messages/message_20261113_194531_922327_3b19012c.json",
+        "sha256": "daa42bf69067e1a0d7c04ed44433f144b389e11a945916db27707c4b029e246d",
+        "verified": true
+      },
+      {
+        "path": "/Users/justin/.local/share/faultline/deployments/AIReceptionist/faultline-runtime/messages/message_20261113_194701_409844_03141154.json",
+        "sha256": "c96285d989fc5a752f76ab0c5d8317bcca87b18c461b14c43c300a0d55ba1bb5",
+        "verified": true
+      }
+    ]
+  },
+  {
+    "storyId": "sip-2026-11-13T19-59-57-621Z-live",
+    "version": {
+      "before": "aireceptionist config e0e9fd9c3df2",
+      "model": "gpt-realtime-2.1",
+      "promptHash": "309d0d37ba5b"
+    },
+    "transport": "sip",
+    "tier": "tool-call-artifact",
+    "sources": [
+      {
+        "path": "results/sip/2026-11-13T19-59-57-621Z-live/events.jsonl",
+        "sha256": "66846341139092c313225bcb7aaf432c2aee10f9e8247b7c941434c1938c09aa",
+        "verified": true
+      },
+      {
+        "path": "results/sip/2026-11-13T19-59-57-621Z-live/summary.json",
+        "sha256": "5a5941b19fc406410825615e2f26559fa58930db7329ac03488837c941fc535c",
+        "verified": true
+      },
+      {
+        "path": "/Users/justin/.local/share/faultline/deployments/AIReceptionist/faultline-runtime/messages/message_20261113_200226_146286_1602b76d.json",
+        "sha256": "1553c552db50ee6d98a350cb7bcec20e64c932d7990950b7145952c8cb867184",
+        "verified": true
+      }
+    ]
+  }
+]

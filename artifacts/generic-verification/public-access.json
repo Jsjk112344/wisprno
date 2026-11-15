@@ -1,0 +1,9 @@
+{
+  "status": {
+    "authenticated": true,
+    "required": false
+  },
+  "anonymousStopUnknown": 404,
+  "crossOrigin": 403,
+  "paidCalls": 0
+}

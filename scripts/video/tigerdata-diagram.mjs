@@ -1,0 +1,57 @@
+/* global console */
+import fs from 'node:fs';
+import path from 'node:path';
+const {chromium}=await import('/tmp/faultline-tiger-browser/node_modules/playwright/index.mjs');
+const out=path.resolve('artifacts/demo-video/tigerdata');
+const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 1 L8 5 L0 9" fill="none" stroke="#c7f76c" stroke-width="2"/></marker><style>text{font-family:Arial,sans-serif;fill:#f4edff}.eyebrow{font-size:20px;letter-spacing:3px;fill:#c7f76c}.title{font-size:32px;font-weight:700}.body{font-size:25px;fill:#d3c4df}.mono{font-family:monospace;font-size:25px;fill:#c7f76c}.small{font-size:22px;fill:#baa7ca}.card{fill:#2c2138;stroke:#69517d;stroke-width:2}.flow{fill:none;stroke:#c7f76c;stroke-width:3;marker-end:url(#arrow)}</style></defs>
+<rect width="1920" height="1080" fill="#21182c"/>
+<text x="80" y="77" class="eyebrow">WISPRNO × TIGER DATA</text>
+<text x="80" y="151" font-size="57" font-weight="700">Is each agent version safer than the last?</text>
+<text x="80" y="201" class="body">Archive the calls. Compare the results. See when a breach returns.</text>
+<rect class="card" x="80" y="270" width="460" height="330" rx="22"/>
+<text x="110" y="315" class="eyebrow">01 · RECORDED TESTS</text>
+<text x="110" y="366" class="title">Ordered event logs</text>
+<text x="110" y="414" class="body">Caller → agent → tool → record</text>
+<text x="110" y="462" class="body">Verdict + exact agent version</text>
+<text x="110" y="510" class="body">Attack and normal-call trials</text>
+<text x="110" y="564" class="mono">results/</text>
+<path class="flow" d="M540 435 H605"/>
+<rect class="card" x="620" y="270" width="470" height="330" rx="22"/>
+<text x="650" y="315" class="eyebrow">02 · ARCHIVE LOADER</text>
+<text x="650" y="366" class="title">Preserve every event.</text>
+<text x="650" y="414" class="body">Read saved events and fixes</text>
+<text x="650" y="462" class="body">Preserve the raw JSON + source</text>
+<text x="650" y="510" class="body">Repeat loads without duplicates</text>
+<text x="650" y="564" class="mono">npm run tiger:load</text>
+<path class="flow" d="M1090 435 H1155"/>
+<rect x="1170" y="270" width="670" height="330" rx="22" fill="#30283a" stroke="#c7f76c" stroke-width="2"/>
+<text x="1200" y="315" class="eyebrow">03 · TIGER DATA</text>
+<text x="1200" y="366" class="title">A searchable history of every test</text>
+<text x="1200" y="417" class="mono">call_events</text><text x="1415" y="417" class="body">· time-series hypertable</text>
+<text x="1200" y="460" class="body">One row per timestamped event</text>
+<path d="M1200 486 H1810" stroke="#69517d"/>
+<text x="1200" y="527" class="mono">fix_attempts</text>
+<text x="1200" y="568" class="body">Proposed fixes, decisions, replay counts</text>
+<path class="flow" d="M1505 600 V665"/>
+<rect class="card" x="1170" y="680" width="670" height="240" rx="22"/>
+<text x="1200" y="724" class="eyebrow">04 · HOURLY CONTINUOUS AGGREGATE</text>
+<text x="1200" y="773" class="mono">call_metrics_hourly</text>
+<text x="1200" y="819" class="body">Count completed tests from run.end events</text>
+<text x="1200" y="863" class="body">Group by version, strategy, case and phase</text>
+<text x="1200" y="899" class="small">Refreshed after the archive load</text>
+<path class="flow" d="M1170 800 H1105"/>
+<rect class="card" x="80" y="680" width="1010" height="240" rx="22"/>
+<text x="110" y="724" class="eyebrow">05 · WISPRNO RESULTS CHART</text>
+<text x="110" y="773" class="title">Did the fix hold? Can normal callers still finish?</text>
+<text x="110" y="822" class="body">Breached / held / inconclusive · normal-call completion</text>
+<text x="110" y="868" class="body">Counts and confidence intervals, tied to the agent version</text>
+<text x="110" y="902" class="small">Server reads Tiger Data → /api/metrics → /tiger</text>
+<path d="M80 970 H1840" stroke="#69517d"/>
+<text x="80" y="1020" class="body">Local files remain the source of truth. Tiger Data stores and summarizes evidence; the engine scores the tests.</text>
+</svg>`;
+fs.writeFileSync(path.join(out,'wisprno-tigerdata.svg'),svg);
+fs.writeFileSync(path.join(out,'index.html'),`<!doctype html><meta charset="utf-8"><title>Wisprno × Tiger Data</title><style>body{margin:0;background:#21182c}svg{display:block;width:100%;height:auto}</style>${svg}`);
+const b=await chromium.launch({headless:true,executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'});const p=await b.newPage({viewport:{width:1920,height:1080}});await p.setContent(svg);await p.addStyleTag({content:'body{margin:0}svg{display:block}'});await p.screenshot({path:path.join(out,'wisprno-tigerdata.png')});await b.close();
+fs.writeFileSync(path.join(out,'NARRATION.txt'),`Every call becomes a stream of timestamped events. We load those events into Tiger Data, alongside the fixes we tried. Its hourly aggregate groups completed tests by agent version. That powers our results chart: did the attack still work, and could normal callers still finish? The local evidence stays the source of truth.\n\nSOURCE REFERENCES\nsql/tiger.sql: call_events hypertable, fix_attempts table, call_metrics_hourly aggregate over run.end events.\nsrc/tiger/database.ts: duplicate-safe archive load, explicit aggregate refresh, chart queries.\nsrc/tiger/http.ts and src/loop/server.ts: server-side metrics query and /tiger chart.\nscripts/load-tiger.ts: archive loader entry point.\n\nThe diagram describes the archive/chart integration. It does not claim that Tiger Data produces the verdict or feeds the test engine.\n`);
+console.log('Created SVG, 1080p PNG, browser preview, and narration.');

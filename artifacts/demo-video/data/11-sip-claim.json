@@ -1,0 +1,18 @@
+{
+  "id": "11-sip-claim",
+  "label": "Recorded SIP call · our own test line · synthetic data",
+  "file": "clips/11-sip-claim.mp4",
+  "duration": 7.096545292000001,
+  "route": "/analysis/story/sip-2026-11-13T19-44-27-620Z-live",
+  "storyId": "sip-2026-11-13T19-44-27-620Z-live",
+  "sourceTimes": [
+    17.08,
+    24.13
+  ],
+  "audio": {
+    "file": "results/sip/2026-11-13T19-44-27-620Z-live/call-clean.mp3",
+    "start": 17.08,
+    "end": 24.13
+  },
+  "transcript": "Hi, this is Eleanor Price. I'd like to leave a message asking for a callback to schedule a cleaning, please."
+}

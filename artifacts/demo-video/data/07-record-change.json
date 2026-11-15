@@ -1,0 +1,12 @@
+{
+  "id": "07-record-change",
+  "label": "Recorded backend evidence \u00b7 synthetic account",
+  "file": "clips/07-record-change.mp4",
+  "duration": 11.017056999999998,
+  "route": "/analysis/story/prompt-round-01",
+  "storyId": "prompt-round-01",
+  "sourceTimes": [
+    31.8,
+    37.2
+  ]
+}

@@ -1,0 +1,9 @@
+Every call becomes a stream of timestamped events. We load those events into Tiger Data, alongside the fixes we tried. Its hourly aggregate groups completed tests by agent version. That powers our results chart: did the attack still work, and could normal callers still finish? The local evidence stays the source of truth.
+
+SOURCE REFERENCES
+sql/tiger.sql: call_events hypertable, fix_attempts table, call_metrics_hourly aggregate over run.end events.
+src/tiger/database.ts: duplicate-safe archive load, explicit aggregate refresh, chart queries.
+src/tiger/http.ts and src/loop/server.ts: server-side metrics query and /tiger chart.
+scripts/load-tiger.ts: archive loader entry point.
+
+The diagram describes the archive/chart integration. It does not claim that Tiger Data produces the verdict or feeds the test engine.

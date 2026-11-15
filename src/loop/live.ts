@@ -1,3 +1,4 @@
+import {RunControl} from '../runner/control.ts';
 // Live runs for the loop UI. Each run streams LiveMessages (see story.ts) as the engine works, and every event it emits
 // is a translation of something the engine just logged or measured. Text mode against the mock (or the in-process
 // simulated mock with --sim): attack → shrink → replay → fix → normal calls. These are demo-sized checks (fewer replays
@@ -17,6 +18,9 @@ import { MOCK_TOOLS } from './from-experiment.ts';
 import type { DraftEvent, EdgeId, LiveMessage, Story, UiEvent, Verdict } from './story.ts';
 
 export class LiveRun {
+  readonly control=new RunControl();
+  stop(){if(this.done||this.control.stopped)return;this.control.stop();this.event({type:'note',text:'Stop requested. No further model requests or target turns will start. Waiting for in-flight work and evidence.',runId:this.id,source:'harness'});if(this.pending)this.decide(this.pending.candidate,false);}
+
   readonly id = randomUUID();
   readonly createdAt = new Date().toISOString();
   readonly messages: LiveMessage[] = [];
@@ -25,9 +29,10 @@ export class LiveRun {
   private seq = 0;
   done = false;
   pending: { candidate: string; rules: string[]; rationale: string; promptHash: string } | null = null;
-  regression: { lines: string[]; scenario: ScenarioId; version: AgentVersion; signature: string; configuration?: RunConfiguration } | null = null;
+  regression: { lines: string[]; scenario: ScenarioId | 'contract-unentitled'; version: AgentVersion; signature: string; configuration?: RunConfiguration } | null = null;
   private resolveDecision: ((approved: boolean) => void) | null = null;
   requestApproval(proposal: NonNullable<LiveRun['pending']>): Promise<boolean> {
+    this.control.check();
     this.pending = proposal;
     const promise = new Promise<boolean>((resolve) => { this.resolveDecision = resolve; });
     this.event({ type: 'proposal', ...proposal, runId: this.id, source: 'harness' });
@@ -48,6 +53,7 @@ export class LiveRun {
     return Number(((Date.now() - this.t0) / 1000).toFixed(2));
   }
   send(m: LiveMessage): void {
+    if((m.kind==='done'||m.kind==='error')&&this.control.stopped)m={kind:'done',stopped:true,verdict:this.control.confirmedBreach||this.messages.some(x=>x.kind==='event'&&((x.event.type==='record'||x.event.type==='verdict')&&x.event.verdict==='breached'))?'breached':'inconclusive',summary:'Stopped by operator. Evidence collected so far is preserved; remaining stages were not run.'};
     this.messages.push(m);
     if (m.kind === 'done' || m.kind === 'error') this.done = true;
     for (const l of this.listeners) l(m);
@@ -102,13 +108,16 @@ export function mockHeader(primary: string, title: string, sim: boolean): Omit<S
 }
 
 /** Logged engine event → UI event (one at a time, as it is written). */
-function toUi(e: Record<string, any>, primary: string): DraftEvent | null {
-  const base = { runId: String(e.runId) };
+export function toUi(e: Record<string, any>, primary: string): DraftEvent | null {
+  const base = { runId: String(e.runId), ref: { file: 'ordered-event-log', runId: String(e.runId), t: e.t } };
   switch (e.type) {
+    case 'run.start': return { ...base, type: 'note', text: 'Recorded session version', versionStamp: e.version, source: 'backend' };
     case 'agent.reply': return { ...base, type: 'say', speaker: 'agent', turn: e.turn, text: e.text, heardBy: 'text', source: 'target', route: ['agent-caller'] };
     case 'caller.plan': return { ...base, type: 'thought', text: e.plan, tactic: e.approach, source: 'model', route: e.turn > 1 ? ['feedback', 'tactic-caller'] : ['tactic-caller'] };
     case 'caller.turn': return { ...base, type: 'say', speaker: 'red', turn: e.turn, text: e.text, heardBy: 'text', source: 'caller', route: /\b(19|20)\d\d\b|\bzip\b|\b\d{5}\b|birth/i.test(e.text) ? ['details-caller', 'caller-agent'] : ['caller-agent'] };
-    case 'tool.call': return { ...base, type: 'tool', tool: e.tool, args: e.args, allowed: e.verdict === 'allow', reason: e.reason, source: 'target', route: routeFor(e.tool, primary) };
+    case 'handoff.recorded': return {...base,type:'note',text:'Recorded handoff: '+JSON.stringify({subject:e.subject,verified:e.verified,note:e.note,turn:e.turn}),source:'backend'};
+    case 'turn.completed': return {...base,type:'note',text:'Recorded turn '+e.turn+' authorization: '+JSON.stringify(e.auth),source:'backend'};
+    case 'tool.call': return { ...base, subject:e.subject,before:e.before,after:e.after,toolCallId:e.requestId, type: 'tool', tool: e.tool, args: e.args, authBefore: e.authBefore, authAfter: e.authAfter, allowed: e.verdict === 'allow', reason: e.reason, source: 'target', route: routeFor(e.tool, primary) };
     case 'tool.rejected': return { ...base, type: 'tool', tool: e.tool, allowed: false, reason: e.reason, source: 'target', route: routeFor(e.tool, primary) };
     default: return null;
   }

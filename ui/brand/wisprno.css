@@ -1,0 +1,13 @@
+/* WisprNo UI tokens. SVG files have transparent backgrounds. */
+:root { --wisprno-plum:#21182c; --wisprno-lilac:#ddd3f1; --wisprno-lime:#c7f464; --wisprno-paper:#f4effb; --wisprno-olive:#53751d; }
+.wisprno-logo { display:block; width:180px; height:auto; flex-shrink:0; }
+.wisprno-logo--icon { width:40px; }
+.wisprno-logo--stacked { width:180px; }
+.wisprno-logo--hero { width:min(360px,80vw); }
+/* These variables recolor INLINE SVG only. External <img> uses its file palette. */
+.wisprno-inline { --mark:var(--wisprno-lilac); --eyes:var(--wisprno-lime); --word:var(--wisprno-lilac); }
+.wisprno-inline--light { --mark:var(--wisprno-plum); --eyes:var(--wisprno-olive); --word:var(--wisprno-plum); }
+.wisprno-inline--mono { --mark:currentColor; --eyes:currentColor; --word:currentColor; }
+.wisprno-inline [id="waveform"] { fill:var(--mark); }
+.wisprno-inline [id="eyes"] { fill:var(--eyes); }
+.wisprno-inline [id="wordmark"] { fill:var(--word); }

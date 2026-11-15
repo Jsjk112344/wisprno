@@ -1,0 +1,11 @@
+{
+  "id": "09-server-check",
+  "label": "Separate experiment \u00b7 checks strategy, round 2",
+  "file": "clips/09-server-check.mp4",
+  "duration": 11.063351541999996,
+  "route": "/analysis/story/checks-round-02",
+  "storyId": "checks-round-02",
+  "sourceTimes": [
+    146.08
+  ]
+}

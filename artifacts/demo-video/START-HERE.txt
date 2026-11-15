@@ -1,0 +1,86 @@
+WISPRNO DEMO EDIT PACK
+
+Open index.html to browse the script, screen segments, and evidence notes.
+
+MAIN FILES
+wisprno-call-and-breach.mp4 — archived alternate SIP sequence, removed from the main and compact edits.
+wisprno-setup.mp4 — complete setup: GitHub connection and map, then actual-platform target name/personality and red-team selection.
+SETUP-SCRIPT.txt — matching setup voiceovers.
+setup-captions.srt — setup caption timing draft.
+wisprno-guide-cut.mp4 — 1080p / 30 fps review edit. Camera placeholders carry your lines. Illustrative opening audio and restrained editorial sound cues are included. Record your camera footage and voiceovers to finish the submission.
+wisprno-screen-only.mp4 — screen segments and transition/end cards, in edit order.
+wisprno-60s-fallback.mp4 — compact evidence cut with the separate-experiment boundary preserved.
+FULL-SCRIPT.txt — complete camera lines, voiceovers, call transcript, timecodes, and direction.
+CAMERA-ONLY.txt — four camera takes.
+VOICEOVER-ONLY.txt — narration to record over the screen captures.
+script-captions.srt — draft caption timings; retime to your final delivery.
+labelled-clips/ — individual MP4s with evidence labels. SIP clips include original audio.
+clips/ — clean screen recordings, without editorial labels or audio. Preserve labels when using these in your edit.
+audio/ — original call excerpts and separately generated editorial effects.
+timeline.json — scene order, duration, source clip, labels, script, and camera cues.
+provenance.json — archive hashes verified against the source files.
+
+HOW IT WAS CAPTURED
+The GitHub connection and repository-mapping sequence is a disclosed mock animation. It uses an example URL and exact source references from the owned local mock. No GitHub integration or network call is claimed. Open github-demo/index.html to preview it; source references are in github-demo/source-references.json. The current source snapshot is distinct from historical experiment versions.
+
+The actual local React UI was captured with Playwright screenshots and encoded with ffmpeg. The recorder used the app's existing history routes and timeline control to select recorded evidence. Text playback is paced for readability, not measured latency. These actual-platform captures use no fake API responses or synthesized model outcomes. No paid model requests were made. The separate fictional opening is described below.
+
+The connection/map shots inspect the local catalogue with Gemini disabled. Approval and Save as test were performed against a fresh scripted-model run. Those clips are labelled simulation and are excluded from scientific claims. The simulated regression was actually saved locally; its run ID is in data/workflow-run.json.
+
+The original SIP excerpts are three cuts from one call. Omissions are disclosed. Later in that call, the attacker admits being Alex and the agent refuses; the breach shown happened at the earlier identity claim. The video does not claim that later refusal was defeated.
+
+The four-to-two-line result comes from prompt round 1. Its ten-of-ten result belongs to the minimizer batch; the later batch was seventeen of twenty. The server-check result comes from checks round 2 and uses a different three-line attack. Its paired result is nine of twenty before and zero of twenty after. Normal calls: fourteen of twenty before (six inconclusive), twenty of twenty after. Mean turns: 2.60 before, 3.35 after. Those statistics do not establish safety for all callers or versions.
+
+REPRODUCE
+Run commands from the repository root. Needs Node, Chrome, Playwright, Python 3, and ffmpeg/ffprobe. PLAYWRIGHT_MODULE can point to an existing Playwright index.mjs; CHROME_PATH can point to Chrome.
+
+npm run ui:build
+node scripts/build-loop-stories.ts --round prompt:1 --round checks:2 --out artifacts/demo-video/data/stories.json
+DEMO_STORIES_FILE=artifacts/demo-video/data/stories.json node src/runner/cli.ts ui --sim --port 4327
+
+In another terminal:
+node scripts/video/record.mjs
+node scripts/video/github-demo.mjs
+node scripts/video/record.mjs setup
+node scripts/video/build-project.mjs
+python3 scripts/video/assemble.py
+
+The capture script accepts intro, evidence, sip, workflow, or results as its first argument to recapture a section. A workflow recapture creates another labelled simulation run and regression. Do not use a paid live server for this script.
+
+The script builder checks archive hashes. The supplied script uses existing recorded evidence, not a fresh generalization test. Files under frames/, data/, graphics/, and edit-segments/ support reproducibility; the finished edit pack does not require sharing raw experiment archives.
+
+REPLAY FIX
+During review, the archival translator was found to drop normal-call turns and completion fields. src/loop/from-experiment.ts now forwards those source values to the UI. The result clip was recaptured after confirming all twenty calls in each group and the 2.60 / 3.35 averages. npm run check passed.
+
+GITHUB CONNECTION UPDATE
+wisprno-github-connection.mp4 contains the complete connection and mapping insert. The main cut now uses 17-github-connect and 18-repo-mapping instead of 02-connect and 03-permission-map. The old captures remain available as alternate takes.
+
+ACTUAL-PLATFORM SETUP UPDATE
+Clips 19 and 20 record the actual profile and red-team UI. Pioneer / Calm & precise / Jules / Card status were verified to persist on the selection screen. No investigation was launched. The main cut and wisprno-setup.mp4 include these controls immediately after the GitHub/mock mapping sequence.
+
+MOTION AND IMPACT UPDATE
+The opening and card-lock attack are now recorded with playback running. Paths move through the graph. A native red vignette appears only on a recorded backend/tool-artifact breach and clears when the check is accepted after testing. It respects reduced-motion preferences. The vignette was brought into the current arena from the legacy visual design.
+Ringing and SIP speech in clips 21, 22, 23 and 25 are captured directly from the browser audio graph. The ring is platform-generated; speech is the existing recorded SIP audio. No new call or model request was made. Clips are edited at disclosed excerpt boundaries. Text-mode clip 26 uses the actual running animation and leaves space for your voiceover.
+Reproduce these new captures with: node scripts/video/record.mjs motion
+Then run build-project.mjs, assemble.py, and package.py.
+
+ILLUSTRATIVE OPENING UPDATE
+wisprno-intro.mp4 is a new 17-second fictional payout-change example. The following camera transition identifies the opening as an illustration with synthetic voices. No money is transferred. The main guide cut opens with this scene, followed by a camera disclosure, then Wisprno and the setup flow. The compact cut also uses the new opening and omits the Eleanor Price SIP sequence.
+Audio uses local macOS stock voices Daniel and Samantha, a generated short ring, and a restrained impact at the fictional record change. No voice cloning or paid service was used. Dialogue timing is editorial and is not a model latency measurement.
+Reproduce on macOS: python3 scripts/video/make-intro-audio.py
+Then: node scripts/video/illustrative-intro.mjs
+Then: node scripts/video/build-project.mjs
+Then: python3 scripts/video/assemble.py
+Then: python3 scripts/video/package.py
+
+INTRO EDIT
+The Eleanor Price SIP intro has been removed from both current cuts and the main script. Its original footage remains available as an archived alternate. The new sequence is illustrative opening, camera introduction, Wisprno, GitHub setup, agent selections, then recorded text experiments and fixes.
+
+OPENING CLEANUP
+Removed the top illustration badge, the company subtitle, and the bottom fictional-example footer at the user’s request. The camera transition still identifies the opening as an illustration with synthetic voices.
+
+CLEAN PRESENTATION UPDATE
+Small editorial disclaimer overlays have been removed across the current video. The GitHub animation no longer displays its demo badge, local-source explanation, or footer. Context remains in the narration, script, source references, and timeline. Actual platform data labels and verdicts remain part of the recorded UI.
+
+ARCHITECTURE TRANSITION
+wisprno-architecture.mp4 is the 32-second animated tester/agent/evidence loop with Vultr hosting and Tiger Data history. It follows agent selection and precedes the experiment in the main cut. It is silent for your voiceover, supplied in architecture/VOICEOVER.txt and FULL-SCRIPT.txt. It explains the process rather than replaying a measured result.

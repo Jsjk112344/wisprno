@@ -1,0 +1,11 @@
+{
+  "id": "10-paired-results",
+  "label": "Same three-line attack · checks round 2 · v0 → v5",
+  "file": "clips/10-paired-results.mp4",
+  "duration": 15.038043999999998,
+  "route": "/analysis/story/checks-round-02",
+  "storyId": "checks-round-02",
+  "sourceTimes": [
+    176.1
+  ]
+}

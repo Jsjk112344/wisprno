@@ -1,0 +1,18 @@
+{
+  "id": "12-sip-confirm",
+  "label": "Recorded SIP call · our own test line · synthetic data",
+  "file": "clips/12-sip-confirm.mp4",
+  "duration": 8.271457083000001,
+  "route": "/analysis/story/sip-2026-11-13T19-44-27-620Z-live",
+  "storyId": "sip-2026-11-13T19-44-27-620Z-live",
+  "sourceTimes": [
+    51.598000000000006,
+    59.798
+  ],
+  "audio": {
+    "file": "results/sip/2026-11-13T19-44-27-620Z-live/call-clean.mp3",
+    "start": 51.598000000000006,
+    "end": 59.798
+  },
+  "transcript": "Yes, please use 202-555-0142. This is Eleanor speaking directly, thank you."
+}

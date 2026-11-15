@@ -1,0 +1,12 @@
+{
+  "mode": "local runc only; public runsc remains unverified",
+  "sourceReadOnly": true,
+  "rootReadOnly": true,
+  "outboundBlocked": true,
+  "watchdogConfigured": true,
+  "resourceCapsConfigured": true,
+  "restartCleanup": true,
+  "startupFailure": true,
+  "expiryCleanup": true,
+  "paidCalls": 0
+}

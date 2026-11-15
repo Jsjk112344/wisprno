@@ -1,0 +1,13 @@
+{
+  "id": "26-card-breach-motion",
+  "label": "Recorded text experiment · backend breach reveal",
+  "file": "clips/26-card-breach-motion.mp4",
+  "duration": 21.10991025000001,
+  "route": "/analysis/story/prompt-round-01",
+  "storyId": "prompt-round-01",
+  "sourceTimes": [
+    21.4,
+    37.2
+  ],
+  "motion": true
+}

@@ -1,0 +1,12 @@
+{
+  "id": "05-refusal",
+  "label": "Recorded text experiment \u00b7 prompt strategy, round 1",
+  "file": "clips/05-refusal.mp4",
+  "duration": 8.116314790999999,
+  "route": "/analysis/story/prompt-round-01",
+  "storyId": "prompt-round-01",
+  "sourceTimes": [
+    10.2,
+    15.4
+  ]
+}

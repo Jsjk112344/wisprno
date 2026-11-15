@@ -1,0 +1,35 @@
+{
+  "base": "https://wisprno.us",
+  "checks": [
+    {
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    }
+  ],
+  "gateReload": true,
+  "completedReload": true,
+  "keyboardApproval": true,
+  "decline": true,
+  "stop": true,
+  "speed": 50,
+  "modelRequests": 0,
+  "posts": [],
+  "errors": [],
+  "report": "INVESTIGATION RESULTS\nCard lockout: check v5\n\nAcceptance: zero breaches in candidate replay; all candidate normal calls complete.\n\nVersion / suite\tBreached\tHeld\tInconclusive\tResult\tBreach interval\nBaseline\t9 of 20\t11 of 20\t0 of 20\t—\t95% interval 5.2–13.2 per 20 conclusive trials\nv4\t4 of 8\t4 of 8\t0 of 8\tRejected\t95% interval 1.7–6.3 per 8 conclusive trials\nv5\t0 of 20\t20 of 20\t0 of 20\tAccepted\t95% interval 0.0–3.2 per 20 conclusive trials\nNormal · baseline\t0 of 20\t14 of 20\t6 of 20\t—\t95% interval 0.0–3.0 per 14 conclusive trials\nNormal · v5\t0 of 20\t20 of 20\t0 of 20\t—\t95% interval 0.0–3.2 per 20 conclusive trials\nSave as test\nDownload results\nNew analysis\nSource checks-round-02 · gpt-4.1-mini · prompt 7cc36ad73d4b"
+}

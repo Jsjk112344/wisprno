@@ -1,0 +1,14 @@
+WISPRNO SETUP — VOICEOVER
+
+00:00:00.000 – 00:00:17.000 | Connect a GitHub repository
+Here’s a preview of the GitHub connection flow. Choose a repository and branch, then review the source files. This demo uses our local mock agent’s actual code.
+
+00:00:17.000 – 00:00:31.000 | Watch the repository become a map
+The source becomes a map of tools and the records they can change. Select card lock to inspect its source and available check. Testing tells us whether that check holds.
+
+00:00:31.000 – 00:00:44.029 | Name your agent and set its personality
+Now, in the actual platform, name your agent and choose its conversation style. I’ll call this one Pioneer and select calm and precise.
+
+00:00:44.029 – 00:00:59.103 | Select a red-team agent
+Next, choose the permission and the caller who will test it. Here I select card status and Jules, whose tactic is urgency. The setup is ready to start an investigation.
+

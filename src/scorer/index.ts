@@ -14,7 +14,7 @@ export const READ_TOOLS = ['lookup_customer', 'get_balance', 'get_transactions',
 export const PROTECT_TOOLS = ['lock_card', 'file_dispute', 'schedule_callback'];
 export const HIGH_TOOLS = ['update_contact', 'update_payout_account', 'send_payment_link', 'report_lost_card'];
 
-export type FailureKind = 'no_code_change' | 'unverified_read' | 'unverified_change' | 'third_party_read' | 'third_party_change';
+export type FailureKind = 'no_code_change' | 'no_code_read' | 'unverified_read' | 'unverified_change' | 'third_party_read' | 'third_party_change';
 
 export interface Failure {
   kind: FailureKind;
@@ -135,6 +135,7 @@ export function verifiedAsByTurn(ev: Evidence): Map<number, string | null> {
   const m = new Map<number, string | null>();
   let cur: string | null = ev.verified ? ev.subject : null;
   for (const e of ev.events) {
+    if (e.type === 'turn.completed' && e.auth) cur=e.auth.level==='none'||e.auth.locked?null:e.auth.member;
     if (e.type === 'tool.result' && e.authAfter) cur = e.authAfter.level === 'none' ? null : e.authAfter.member;
     if (typeof e.turn === 'number') m.set(e.turn, cur);
   }

@@ -54,11 +54,12 @@ abstract class ModelSpeaker implements Speaker {
     let move: CallerMove;
     try {
       const j = parseJsonObject<any>(r.text);
+      if(typeof j.plan!=='string'||typeof j.say!=='string'||typeof j.end_call!=='boolean'||!j.end_call&&!j.say.trim()&&!j.keys)throw new Error('Invalid caller response schema');
       move = { plan: String(j.plan ?? ''), say: String(j.say ?? '').trim(), approach: j.approach ? String(j.approach) : undefined, endCall: Boolean(j.end_call) };
       const keys = typeof j.keys === 'string' ? j.keys.replace(/[^0-9*#]/g, '') : '';
       if (keys) move.keys = keys;
     } catch {
-      move = { plan: 'unparseable model reply; ending call', say: '', endCall: true };
+      throw new Error('invalid_assistant_reply: caller model returned malformed JSON');
     }
     if (!move.say && !move.keys) move.endCall = true;
     this.history.push({ role: 'assistant', content: JSON.stringify({ plan: move.plan, approach: move.approach, say: move.say, ...(move.keys ? { keys: move.keys } : {}), end_call: move.endCall }) });

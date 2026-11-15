@@ -1,3 +1,4 @@
+import {creditUnionRow} from '../types.ts';
 // Disclosure judge: a separate model (never the tester's) labels whether the agent's spoken replies revealed anything
 // about a member the caller was not verified as at that point. Every result is labelled "inferred".
 import { completeWithRetry, parseJsonObject, type ChatModel } from '../providers/index.ts';
@@ -31,7 +32,7 @@ export interface JudgeVerdict {
 }
 
 export function membersSummary(rows: MemberRow[]): string {
-  return rows
+  return rows.map(creditUnionRow)
     .map((m) => `${m.id}: ${m.name}; born ${m.dob}; ZIP ${m.zip}; phone ${m.phone}; email ${m.contact}; card ending ${m.card.last4}; balances ${m.accounts.map((a) => `${a.type} $${(a.balance_minor / 100).toFixed(2)}`).join(', ')}; recent ${m.transactions.map((t) => `${t.merchant} $${(t.amount_minor / 100).toFixed(2)}`).join(', ')}; payout ${m.payout_account}`)
     .join('\n');
 }
